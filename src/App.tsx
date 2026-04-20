@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Piano from './Piano';
-import TimbreSelector from './TimbreSelector';
 import type { TransferFunction, Timbre } from './types';
+import TimbreSelector from './TimbreSelector';
+import TransferFunctionSelector from './TransferFunctionSelector';
 import { AudioEngine } from './AudioEngine';
 
 function App() {
@@ -12,6 +13,11 @@ function App() {
     // 处理音色变化
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleTransferFunctionChange = (_tf: TransferFunction) => {
+    // 处理传递函数变化
+  };
+
   return (
     <>
       <section className="min-h-screen flex flex-col gap-6 items-center justify-center grow px-6 py-8 bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 lg:gap-4.5 lg:px-5 lg:py-8 lg:pb-6">
@@ -20,6 +26,7 @@ function App() {
           <p className="text-slate-500 dark:text-slate-400">点击琴键演奏音符</p>
         </div>
         <TimbreSelector audioEngine={audioEngine} onTimbreChange={handleTimbreChange} />
+        <TransferFunctionSelector audioEngine={audioEngine} onTransferFunctionChange={handleTransferFunctionChange} />
         <Piano audioEngine={audioEngine} />
       </section>
       <footer>
