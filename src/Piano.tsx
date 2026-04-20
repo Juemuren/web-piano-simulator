@@ -33,12 +33,12 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
   ];
 
   return (
-    <div className="flex flex-wrap">
+    <div className="w-full flex flex-wrap">
       {keys.map((key) => (
         <button
           key={key.note}
           onClick={() => playNote(key.note)}
-          className={`w-12.5 h-37.5 m-0.5 border border-black ${
+          className={`w-1/13 h-37.5 border border-black ${
             key.label.includes('#') ? 'bg-black text-white' : 'bg-white text-black'
           }`}
         >

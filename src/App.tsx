@@ -22,7 +22,11 @@ function App() {
         <Piano audioEngine={audioEngine} />
       </section>
       <footer>
-        相关数学原理可阅读我的科普文章<a href='https://juemuren.github.io/MyBlogs/posts/math/%E9%9F%B3%E4%B9%90%E7%9A%84%E6%95%B0%E5%AD%A6%E5%8E%9F%E7%90%86/'>《音乐的数学原理：从振动弦到现代乐理》</a>
+        相关数学原理可阅读我的科普文章
+        <a href='https://juemuren.github.io/MyBlogs/posts/math/%E9%9F%B3%E4%B9%90%E7%9A%84%E6%95%B0%E5%AD%A6%E5%8E%9F%E7%90%86/'
+          className="text-blue-600 underline hover:text-blue-800">
+        《音乐的数学原理：从振动弦到现代乐理》
+        </a>
       </footer>
     </>
   );

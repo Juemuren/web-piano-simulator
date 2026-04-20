@@ -60,8 +60,8 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine, onTimbreCh
     </span>);
 
   return (
-    <div className="p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
-      <div className="mb-5 flex flex-col gap-3">
+    <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
+      <div className="mb-2 flex flex-col gap-3">
         <h2 className="text-2xl font-semibold">音色调节器</h2>
         <div className="space-y-2">
           <label className="block text-sm font-medium">选择预设或移动按钮</label>
@@ -107,9 +107,9 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine, onTimbreCh
 
       <div className="flex items-end gap-2 overflow-x-auto px-1 pb-3">
         {amplitudes.map((amp, index) => (
-          <div key={index} className="flex min-w-8 flex-col items-center gap-3">
+          <div key={index} className="flex flex-col items-center gap-3">
             <div className="text-xs">{amp.toFixed(2)}</div>
-            <div className="relative flex h-36 w-8 items-center justify-center">
+            <div className="relative flex h-36 w-6 items-center justify-center">
               <input
                 type="range"
                 min="0"
