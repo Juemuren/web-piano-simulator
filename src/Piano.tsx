@@ -15,7 +15,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
     audioEngine.playNote(note, 2); // 播放 2 秒
   };
 
-  // 简单键盘：C4 到 C5
+  // 从C4 到 C5 的简单键盘
   const keys = [
     { note: 60, label: 'C4' },
     { note: 61, label: 'C#4' },
@@ -38,7 +38,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
         <button
           key={key.note}
           onClick={() => playNote(key.note)}
-          className={`w-1/13 h-37.5 border border-black ${
+          className={`text-xs sm:text-sm w-1/13 h-37.5 border border-black ${
             key.label.includes('#') ? 'bg-black text-white' : 'bg-white text-black'
           }`}
         >
