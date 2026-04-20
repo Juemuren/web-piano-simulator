@@ -7,6 +7,8 @@ import { AudioEngine } from './AudioEngine';
 
 function App() {
   const [audioEngine] = useState(() => new AudioEngine());
+  const [isTimbreExpanded, setIsTimbreExpanded] = useState(false);
+  const [isTransferExpanded, setIsTransferExpanded] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTimbreChange = (_timbre: Timbre) => {
@@ -25,8 +27,32 @@ function App() {
           <h1 className="text-3xl font-bold">钢琴模拟器</h1>
           <p className="text-slate-500 dark:text-slate-400">点击琴键演奏音符</p>
         </div>
-        <TimbreSelector audioEngine={audioEngine} onTimbreChange={handleTimbreChange} />
-        <TransferFunctionSelector audioEngine={audioEngine} onTransferFunctionChange={handleTransferFunctionChange} />
+        <div className="w-full max-w-4xl">
+          <button
+            onClick={() => setIsTimbreExpanded(!isTimbreExpanded)}
+            className="w-full text-left p-4 bg-white dark:bg-slate-800 rounded-lg shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <h2 className="text-xl font-semibold">音色调节器 {isTimbreExpanded ? '▼' : '▶'}</h2>
+          </button>
+          {isTimbreExpanded && (
+            <div className="mt-4">
+              <TimbreSelector audioEngine={audioEngine} onTimbreChange={handleTimbreChange} />
+            </div>
+          )}
+        </div>
+        <div className="w-full max-w-4xl">
+          <button
+            onClick={() => setIsTransferExpanded(!isTransferExpanded)}
+            className="w-full text-left p-4 bg-white dark:bg-slate-800 rounded-lg shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <h2 className="text-xl font-semibold">传递函数调节器 {isTransferExpanded ? '▼' : '▶'}</h2>
+          </button>
+          {isTransferExpanded && (
+            <div className="mt-4">
+              <TransferFunctionSelector audioEngine={audioEngine} onTransferFunctionChange={handleTransferFunctionChange} />
+            </div>
+          )}
+        </div>
         <Piano audioEngine={audioEngine} />
       </section>
       <footer>
