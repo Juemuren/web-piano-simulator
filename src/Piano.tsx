@@ -1,15 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { AudioEngine } from './AudioEngine';
 
-const Piano: React.FC = () => {
-  const audioEngineRef = useRef<AudioEngine>(new AudioEngine());
+interface PianoProps {
+  audioEngine: AudioEngine;
+}
+
+const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
 
   useEffect(() => {
-    audioEngineRef.current.init();
-  }, []);
+    audioEngine.init();
+  }, [audioEngine]);
 
   const playNote = (note: number) => {
-    audioEngineRef.current.playNote(note, 2); // 播放 2 秒
+    audioEngine.playNote(note, 2); // 播放 2 秒
   };
 
   // 简单键盘：C4 到 C5
