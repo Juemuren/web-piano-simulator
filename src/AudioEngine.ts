@@ -1,7 +1,7 @@
-export interface Timbre {
-  name: string;
-  amplitudes: number[];
-}
+import type {
+  TransferFunction, TransferFunctionPreset,
+  Timbre, TimbrePreset
+} from "./types";
 
 export class AudioEngine {
   private audioContext: AudioContext | null = null;
@@ -12,7 +12,7 @@ export class AudioEngine {
   }
 
   // 生成预设音色
-  static generatePresetTimbre(type: 'ethereal' | 'metallic' | 'normal', lambda?: number): Timbre {
+  static generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lambda?: number): Timbre {
     const harmonics = 10;
     const amplitudes: number[] = [];
     for (let n = 1; n <= harmonics; n++) {
@@ -32,7 +32,7 @@ export class AudioEngine {
     }
     const maxAmp = Math.max(...amplitudes, 1);
     const normalized = amplitudes.map(a => a / maxAmp);
-    return { name: type, amplitudes: normalized };
+    return { type, amplitudes: normalized };
   }
 
   init() {

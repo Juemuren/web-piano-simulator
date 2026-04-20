@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { type Timbre, AudioEngine } from './AudioEngine';
-
-type Preset = 'ethereal' | 'metallic' | 'normal' | 'custom';
-
-function isPreset(value: string): value is Preset {
-  return ['ethereal', 'metallic', 'normal', 'custom'].includes(value);
-}
+import type { TimbrePreset, Timbre } from './types';
+import { AudioEngine } from './AudioEngine';
 
 interface TimbreSelectorProps {
   audioEngine: AudioEngine;
@@ -15,20 +10,20 @@ interface TimbreSelectorProps {
 const defaultLambda = 0.5;
 
 const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine, onTimbreChange }) => {
-  const [selectedPreset, setSelectedPreset] = useState<Preset>('normal');
+  const [selectedPreset, setSelectedPreset] = useState<TimbrePreset>('normal');
   const [lambda, setLambda] = useState(defaultLambda);
   const [amplitudes, setAmplitudes] = useState<number[]>(() => AudioEngine.generatePresetTimbre('normal', defaultLambda).amplitudes);
 
   useEffect(() => {
     const timbre: Timbre = {
-      name: selectedPreset === 'custom' ? 'Custom' : selectedPreset,
+      type: 'normal',
       amplitudes,
     };
     audioEngine.setTimbre(timbre);
     onTimbreChange(timbre);
   }, [selectedPreset, amplitudes, audioEngine, onTimbreChange]);
 
-  const handlePresetChange = (preset: Preset) => {
+  const handlePresetChange = (preset: TimbrePreset) => {
     setSelectedPreset(preset);
     if (preset !== 'custom') {
       const presetTimbre = AudioEngine.generatePresetTimbre(preset, preset === 'normal' ? lambda : undefined);
@@ -67,12 +62,7 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine, onTimbreCh
           <label className="block text-sm font-medium">选择预设或移动按钮</label>
           <select
             value={selectedPreset}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (isPreset(value)) {
-                handlePresetChange(value);
-              }
-            }}
+            onChange={(e) => {handlePresetChange(e.target.value as TimbrePreset);}}
             className="
               w-full rounded-2xl border border-slate-700 px-3 py-2
               focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25

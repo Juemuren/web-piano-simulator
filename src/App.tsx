@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Piano from './Piano';
 import TimbreSelector from './TimbreSelector';
-import { AudioEngine, type Timbre } from './AudioEngine';
+import type { TransferFunction, Timbre } from './types';
+import { AudioEngine } from './AudioEngine';
 
 function App() {
   const [audioEngine] = useState(() => new AudioEngine());
