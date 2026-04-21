@@ -59,3 +59,8 @@
   flex-direction: column;
   box-sizing: border-box;
 }
+
+.abcjs-highlight {
+  fill: green !important;
+  stroke: green !important;
+}

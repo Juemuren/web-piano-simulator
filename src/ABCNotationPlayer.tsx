@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { renderAbc } from 'abcjs';
+import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { ABCParser } from './ABCParser';
 import { ABCPlayer } from './ABCPlayer';
 import { AudioEngine } from './AudioEngine';
@@ -24,6 +24,8 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const [abcPlayer] = useState(() => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd));
   const [isPlaying, setIsPlaying] = useState(false);
   const notationRef = useRef<HTMLDivElement | null>(null);
+  const visualObjRef = useRef<TuneObject>(null);
+  const timingCallbacksRef = useRef<TimingCallbacks | null>(null);
 
   const parsedScore = useMemo(() => {
     return ABCParser.parse(abcInput);
@@ -35,24 +37,50 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     notationRef.current.innerHTML = '';
 
     if (parsedScore) {
-      renderAbc(notationRef.current, abcInput, {
+      const visualObjs = renderAbc(notationRef.current, abcInput, {
         responsive: 'resize',
         add_classes: true
+      });
+      visualObjRef.current = visualObjs[0];
+
+      timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
+        eventCallback: (ev) => {
+          if (!ev) return;
+
+          const lastSelection = document.querySelectorAll('.abcjs-highlight');
+          lastSelection.forEach(el => el.classList.remove('abcjs-highlight'));
+
+          if (ev.elements) {
+            ev.elements.forEach((noteGroup: Element[]) => {
+              noteGroup.forEach((element: Element) => {
+                element.classList.add('abcjs-highlight');
+              });
+            });
+          }
+          return "continue"
+        }
       });
     }
   }, [parsedScore, abcInput]);
 
   const handlePlay = () => {
-    if (parsedScore) {
+    if (parsedScore && timingCallbacksRef.current) {
       abcPlayer.play(parsedScore);
+      timingCallbacksRef.current.start();
       setIsPlaying(true);
     }
   };
 
   const handleStop = () => {
     abcPlayer.stop();
+    if (timingCallbacksRef.current) {
+      timingCallbacksRef.current.stop();
+    }
     setIsPlaying(false);
     onStop();
+
+    const lastSelection = document.querySelectorAll('.abcjs-highlight');
+    lastSelection.forEach(el => el.classList.remove('abcjs-highlight'));
   };
 
   useEffect(() => {
