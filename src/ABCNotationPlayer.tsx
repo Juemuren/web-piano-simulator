@@ -6,6 +6,9 @@ import { AudioEngine } from './AudioEngine';
 
 interface ABCNotationPlayerProps {
   audioEngine: AudioEngine;
+  onNoteStart: (pitch: number) => void;
+  onNoteEnd: (pitch: number) => void;
+  onStop: () => void;
 }
 
 const defaultABCInput = `X: 1
@@ -16,9 +19,9 @@ K: C
 Q: 120
 C C G G | A A G2 | F F E E | D D C2 ||`
 
-export default function ABCNotationPlayer({ audioEngine }: ABCNotationPlayerProps) {
+export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd, onStop }: ABCNotationPlayerProps) {
   const [abcInput, setAbcInput] = useState(defaultABCInput);
-  const [abcPlayer] = useState(() => new ABCPlayer(audioEngine));
+  const [abcPlayer] = useState(() => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd));
   const [isPlaying, setIsPlaying] = useState(false);
   const notationRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,6 +52,7 @@ export default function ABCNotationPlayer({ audioEngine }: ABCNotationPlayerProp
   const handleStop = () => {
     abcPlayer.stop();
     setIsPlaying(false);
+    onStop();
   };
 
   useEffect(() => {
@@ -57,6 +61,13 @@ export default function ABCNotationPlayer({ audioEngine }: ABCNotationPlayerProp
     }, 100);
     return () => clearInterval(interval);
   }, [abcPlayer]);
+
+  useEffect(() => {
+    return () => {
+      abcPlayer.stop();
+      onStop();
+    };
+  }, [abcPlayer, onStop]);
 
   return (
     <div className="w-full max-w-4xl">

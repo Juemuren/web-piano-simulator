@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Piano from './Piano';
 import type { TransferFunction, Timbre } from './types';
 import TimbreSelector from './TimbreSelector';
@@ -11,6 +11,7 @@ function App() {
   const [isTimbreExpanded, setIsTimbreExpanded] = useState(false);
   const [isTransferExpanded, setIsTransferExpanded] = useState(false);
   const [isABCExpanded, setIsABCExpanded] = useState(false);
+  const [playingNotes, setPlayingNotes] = useState<Set<number>>(new Set());
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTimbreChange = (_timbre: Timbre) => {
@@ -21,6 +22,26 @@ function App() {
   const handleTransferFunctionChange = (_tf: TransferFunction) => {
     // 处理传递函数变化
   };
+
+  const handleNoteStart = useCallback((pitch: number) => {
+    setPlayingNotes(prev => {
+      const next = new Set(prev);
+      next.add(pitch);
+      return next;
+    });
+  }, []);
+
+  const handleNoteEnd = useCallback((pitch: number) => {
+    setPlayingNotes(prev => {
+      const next = new Set(prev);
+      next.delete(pitch);
+      return next;
+    });
+  }, []);
+
+  const handleStopPlayingNotes = useCallback(() => {
+    setPlayingNotes(new Set());
+  }, []);
 
   return (
     <>
@@ -64,11 +85,16 @@ function App() {
           </button>
           {isABCExpanded && (
             <div className="mt-4">
-              <ABCNotationPlayer audioEngine={audioEngine} />
+              <ABCNotationPlayer 
+                audioEngine={audioEngine} 
+                onNoteStart={handleNoteStart}
+                onNoteEnd={handleNoteEnd}
+                onStop={handleStopPlayingNotes}
+              />
             </div>
           )}
         </div>
-        <Piano audioEngine={audioEngine} />
+        <Piano audioEngine={audioEngine} playingNotes={playingNotes} />
       </section>
       <footer>
         相关数学原理可阅读我的科普文章

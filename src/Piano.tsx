@@ -3,13 +3,22 @@ import { AudioEngine } from './AudioEngine';
 
 interface PianoProps {
   audioEngine: AudioEngine;
+  playingNotes?: Set<number>;
 }
 
-const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
+const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) => {
   const [pressedKeys, setPressedKeys] = useState<Set<number>>(new Set());
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
 
   useEffect(() => {
     audioEngine.init();
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [audioEngine]);
 
   const playNote = (note: number) => {
@@ -33,54 +42,56 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
     });
   };
 
-  // 从C4 到 C5 的简单键盘
-  const keys = [
-    { note: 60, label: 'C4' },
-    { note: 61, label: 'C#4' },
-    { note: 62, label: 'D4' },
-    { note: 63, label: 'D#4' },
-    { note: 64, label: 'E4' },
-    { note: 65, label: 'F4' },
-    { note: 66, label: 'F#4' },
-    { note: 67, label: 'G4' },
-    { note: 68, label: 'G#4' },
-    { note: 69, label: 'A4' },
-    { note: 70, label: 'A#4' },
-    { note: 71, label: 'B4' },
-    { note: 72, label: 'C5' },
-  ];
+  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const numKeys = Math.min(37, Math.floor(windowWidth / 30));
+  const centerNote = 66; // F#4
+  const startNote = centerNote - Math.floor((numKeys - 1) / 2);
+  const keys = Array.from({ length: numKeys }, (_, index) => {
+    const note = startNote + index;
+    const name = noteNames[note % 12];
+    const octave = Math.floor(note / 12) - 1;
+    return {
+      note,
+      label: name,
+      number: octave
+    };
+  });
 
   return (
-    <div className="w-full flex flex-wrap">
-      {keys.map((key) => {
-        const isPressed = pressedKeys.has(key.note);
-        const isBlack = key.label.includes('#');
-        return (
-          <button
-            key={key.note}
-            onMouseDown={(e) => handleKeyDown(e, key.note)}
-            onMouseUp={(e) => handleKeyUp(e, key.note)}
-            onMouseLeave={(e) => handleKeyUp(e, key.note)}
-            onTouchStart={(e) => handleKeyDown(e, key.note)}
-            onTouchEnd={(e) => handleKeyUp(e, key.note)}
-            onTouchCancel={(e) => handleKeyUp(e, key.note)}
-            className={`text-xs sm:text-sm w-1/13 h-37.5 border border-black transition-all duration-100 ${
-              isBlack
-                ? isPressed
-                  ? 'bg-gray-800 text-white shadow-inner'
-                  : 'bg-black text-white'
-                : isPressed
-                ? 'bg-gray-200 text-black shadow-inner'
-                : 'bg-white text-black'
-            }`}
-            style={{
-              transform: isPressed ? 'translateY(2px)' : 'translateY(0px)',
-            }}
-          >
-            {key.label}
-          </button>
-        );
-      })}
+    <div className="w-full">
+      <div className="flex justify-center">
+        {keys.map((key) => {
+          const isPressed = pressedKeys.has(key.note) || playingNotes.has(key.note);
+          const isBlack = key.label.includes('#');
+          return (
+            <button
+              key={key.note}
+              onMouseDown={(e) => handleKeyDown(e, key.note)}
+              onMouseUp={(e) => handleKeyUp(e, key.note)}
+              onMouseLeave={(e) => handleKeyUp(e, key.note)}
+              onTouchStart={(e) => handleKeyDown(e, key.note)}
+              onTouchEnd={(e) => handleKeyUp(e, key.note)}
+              onTouchCancel={(e) => handleKeyUp(e, key.note)}
+              className={`text-xs w-6 h-37.5 border border-black transition-all duration-100 ${
+                isBlack
+                  ? isPressed
+                    ? 'bg-gray-800 text-white shadow-inner'
+                    : 'bg-black text-white'
+                  : isPressed
+                  ? 'bg-gray-200 text-black shadow-inner'
+                  : 'bg-white text-black'
+              }`}
+              style={{
+                transform: isPressed ? 'translateY(2px)' : 'translateY(0px)',
+              }}
+            >
+              {key.label}
+              <br />
+              {key.number}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
