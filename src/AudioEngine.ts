@@ -183,6 +183,7 @@ export class AudioEngine {
     const baseFreq = this.getFrequency(note);
     const harmonics = this.currentTimbre.amplitudes.length;
     const { magnitudes, phases } = this.computeTransferFunction(baseFreq);
+    const baseReleaseTime = 0.1;
 
     for (let n = 1; n <= harmonics; n++) {
       const osc = this.audioContext.createOscillator();
@@ -196,13 +197,18 @@ export class AudioEngine {
       const timbreAmp = this.currentTimbre.amplitudes[n - 1] || 0;
       const transferMag = magnitudes[n - 1] || 0;
       const amplitude = timbreAmp * transferMag * 0.1;
-      gain.gain.setValueAtTime(amplitude, this.audioContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+
+      // 为高频谐波设置更快的衰减
+      const releaseTime = baseReleaseTime / Math.sqrt(n);
+      const stopTime = this.audioContext.currentTime + duration + releaseTime
 
       // 相位延迟
       const phaseDeg = phases[n - 1] || 0;
       const phaseDelay = phaseDeg / (360 * freq);
       const startTime = Math.max(0, this.audioContext.currentTime + phaseDelay);
+
+      gain.gain.setValueAtTime(amplitude, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.00001, stopTime);
 
       osc.connect(gain);
       gain.connect(this.audioContext.destination);
@@ -219,7 +225,7 @@ export class AudioEngine {
 
       // 启动振荡器
       osc.start(startTime);
-      osc.stop(startTime + duration);
+      osc.stop(stopTime);
     }
   }
 
