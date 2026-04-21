@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { renderAbc } from 'abcjs';
 import { ABCParser } from './ABCParser';
 import { ABCPlayer } from './ABCPlayer';
 import { AudioEngine } from './AudioEngine';
-import type { ABCScore } from './types';
 
 interface ABCNotationPlayerProps {
   audioEngine: AudioEngine;
@@ -20,12 +20,24 @@ export default function ABCNotationPlayer({ audioEngine }: ABCNotationPlayerProp
   const [abcInput, setAbcInput] = useState(defaultABCInput);
   const [abcPlayer] = useState(() => new ABCPlayer(audioEngine));
   const [isPlaying, setIsPlaying] = useState(false);
-  const [parsedScore, setParsedScore] = useState<ABCScore | null>(null);
+  const notationRef = useRef<HTMLDivElement | null>(null);
 
-  const handleParse = () => {
-    const score = ABCParser.parse(abcInput);
-    setParsedScore(score);
-  };
+  const parsedScore = useMemo(() => {
+    return ABCParser.parse(abcInput);
+  }, [abcInput]);
+
+  useEffect(() => {
+    if (!notationRef.current) return;
+
+    notationRef.current.innerHTML = '';
+
+    if (parsedScore) {
+      renderAbc(notationRef.current, abcInput, {
+        responsive: 'resize',
+        add_classes: true
+      });
+    }
+  }, [parsedScore, abcInput]);
 
   const handlePlay = () => {
     if (parsedScore) {
@@ -39,7 +51,6 @@ export default function ABCNotationPlayer({ audioEngine }: ABCNotationPlayerProp
     setIsPlaying(false);
   };
 
-  // Check playing status periodically
   useEffect(() => {
     const interval = setInterval(() => {
       setIsPlaying(abcPlayer.isCurrentlyPlaying());
@@ -61,13 +72,6 @@ export default function ABCNotationPlayer({ audioEngine }: ABCNotationPlayerProp
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          <button
-            onClick={handleParse}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-colors"
-          >
-            解析
-          </button>
-
           {parsedScore && (
             <>
               <button
@@ -89,13 +93,10 @@ export default function ABCNotationPlayer({ audioEngine }: ABCNotationPlayerProp
         </div>
 
         {parsedScore && (
-          <div className="text-sm text-slate-600 dark:text-slate-400">
-            <p>标题: {parsedScore.title}</p>
-            <p>拍子: {parsedScore.meter}</p>
-            <p>调号: {parsedScore.key}</p>
-            <p>节奏: {parsedScore.tempo} BPM</p>
-            <p>音符数量: {parsedScore.notes.length}</p>
-          </div>
+          <div
+            ref={notationRef}
+            className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
+          />
         )}
       </div>
     </div>

@@ -12,7 +12,6 @@ export class ABCParser {
   static parse(abcString: string): ABCScore | null {
     try {
       const tunes = parseOnly(abcString);
-      console.log(tunes)
       const tune = tunes?.[0];
       if (!tune) return null;
       const title = tune.metaText?.title ?? '';
