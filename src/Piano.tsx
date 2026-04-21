@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AudioEngine } from './AudioEngine';
 
 interface PianoProps {
@@ -6,6 +6,7 @@ interface PianoProps {
 }
 
 const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
+  const [pressedKeys, setPressedKeys] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     audioEngine.init();
@@ -13,6 +14,19 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
 
   const playNote = (note: number) => {
     audioEngine.playNote(note, 2); // 播放 2 秒
+  };
+
+  const handleMouseDown = (note: number) => {
+    setPressedKeys(prev => new Set(prev).add(note));
+    playNote(note);
+  };
+
+  const handleMouseUp = (note: number) => {
+    setPressedKeys(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(note);
+      return newSet;
+    });
   };
 
   // 从C4 到 C5 的简单键盘
@@ -34,17 +48,32 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
 
   return (
     <div className="w-full flex flex-wrap">
-      {keys.map((key) => (
-        <button
-          key={key.note}
-          onClick={() => playNote(key.note)}
-          className={`text-xs sm:text-sm w-1/13 h-37.5 border border-black ${
-            key.label.includes('#') ? 'bg-black text-white' : 'bg-white text-black'
-          }`}
-        >
-          {key.label}
-        </button>
-      ))}
+      {keys.map((key) => {
+        const isPressed = pressedKeys.has(key.note);
+        const isBlack = key.label.includes('#');
+        return (
+          <button
+            key={key.note}
+            onMouseDown={() => handleMouseDown(key.note)}
+            onMouseUp={() => handleMouseUp(key.note)}
+            onMouseLeave={() => handleMouseUp(key.note)}
+            className={`text-xs sm:text-sm w-1/13 h-37.5 border border-black transition-all duration-100 ${
+              isBlack
+                ? isPressed
+                  ? 'bg-gray-800 text-white shadow-inner'
+                  : 'bg-black text-white'
+                : isPressed
+                ? 'bg-gray-200 text-black shadow-inner'
+                : 'bg-white text-black'
+            }`}
+            style={{
+              transform: isPressed ? 'translateY(2px)' : 'translateY(0px)',
+            }}
+          >
+            {key.label}
+          </button>
+        );
+      })}
     </div>
   );
 };
