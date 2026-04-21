@@ -16,12 +16,16 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
     audioEngine.playNote(note, 2); // 播放 2 秒
   };
 
-  const handleMouseDown = (note: number) => {
+  const handleKeyDown = (e: React.MouseEvent | React.TouchEvent, note: number) => {
+    if (!('touches' in e)) {
+      e.preventDefault();
+    }
     setPressedKeys(prev => new Set(prev).add(note));
     playNote(note);
   };
 
-  const handleMouseUp = (note: number) => {
+  const handleKeyUp = (e: React.MouseEvent | React.TouchEvent, note: number) => {
+    e.preventDefault();
     setPressedKeys(prev => {
       const newSet = new Set(prev);
       newSet.delete(note);
@@ -54,9 +58,12 @@ const Piano: React.FC<PianoProps> = ({ audioEngine }) => {
         return (
           <button
             key={key.note}
-            onMouseDown={() => handleMouseDown(key.note)}
-            onMouseUp={() => handleMouseUp(key.note)}
-            onMouseLeave={() => handleMouseUp(key.note)}
+            onMouseDown={(e) => handleKeyDown(e, key.note)}
+            onMouseUp={(e) => handleKeyUp(e, key.note)}
+            onMouseLeave={(e) => handleKeyUp(e, key.note)}
+            onTouchStart={(e) => handleKeyDown(e, key.note)}
+            onTouchEnd={(e) => handleKeyUp(e, key.note)}
+            onTouchCancel={(e) => handleKeyUp(e, key.note)}
             className={`text-xs sm:text-sm w-1/13 h-37.5 border border-black transition-all duration-100 ${
               isBlack
                 ? isPressed
