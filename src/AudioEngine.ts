@@ -7,6 +7,8 @@ export class AudioEngine {
   private audioContext: AudioContext | null = null;
   private currentTimbre: Timbre = AudioEngine.generatePresetTimbre('normal', 0.5);
   private currentTransferFunction: TransferFunction = AudioEngine.generatePresetTransferFunction('delay', 0, 0, 440);
+  private activeOscillators: OscillatorNode[] = [];
+  private activeGains: GainNode[] = [];
 
   constructor() {
     // 初始化
@@ -140,6 +142,21 @@ export class AudioEngine {
     return this.currentTransferFunction;
   }
 
+  private async ensureAudioContextRunning(): Promise<void> {
+    if (!this.audioContext) {
+      this.init();
+    }
+    if (!this.audioContext) {
+      return;
+    }
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+    if (this.audioContext.state === 'closed') {
+      this.init();
+    }
+  }
+
   // 计算传递函数对每个谐波的影响
   private computeTransferFunction(baseFreq: number): { magnitudes: number[], phases: number[] } {
     const tf = this.currentTransferFunction;
@@ -159,14 +176,13 @@ export class AudioEngine {
   }
 
   // 播放音符
-  playNote(note: number, duration: number = 1) {
+  async playNote(note: number, duration: number = 1) {
+    await this.ensureAudioContextRunning();
     if (!this.audioContext) return;
 
     const baseFreq = this.getFrequency(note);
     const harmonics = this.currentTimbre.amplitudes.length;
     const { magnitudes, phases } = this.computeTransferFunction(baseFreq);
-    const oscillators: OscillatorNode[] = [];
-    const gains: GainNode[] = [];
 
     for (let n = 1; n <= harmonics; n++) {
       const osc = this.audioContext.createOscillator();
@@ -191,8 +207,15 @@ export class AudioEngine {
       osc.connect(gain);
       gain.connect(this.audioContext.destination);
 
-      oscillators.push(osc);
-      gains.push(gain);
+      this.activeOscillators.push(osc);
+      this.activeGains.push(gain);
+
+      osc.onended = () => {
+        this.activeOscillators = this.activeOscillators.filter(active => active !== osc);
+        this.activeGains = this.activeGains.filter(active => active !== gain);
+        osc.disconnect();
+        gain.disconnect();
+      };
 
       // 启动振荡器
       osc.start(startTime);
@@ -202,8 +225,29 @@ export class AudioEngine {
 
   // 停止所有声音
   stopAll() {
-    if (this.audioContext) {
-      this.audioContext.suspend();
-    }
+    if (!this.audioContext) return;
+
+    this.activeOscillators.forEach((osc) => {
+      try {
+        osc.stop();
+      } catch {
+        // 已经停止时忽略
+      }
+      try {
+        osc.disconnect();
+      } catch {
+        // 忽略可能的断开错误
+      }
+    });
+    this.activeGains.forEach((gain) => {
+      try {
+        gain.disconnect();
+      } catch {
+        // 忽略可能的断开错误
+      }
+    });
+    this.activeOscillators = [];
+    this.activeGains = [];
+    this.audioContext.suspend();
   }
 }

@@ -4,11 +4,13 @@ import type { TransferFunction, Timbre } from './types';
 import TimbreSelector from './TimbreSelector';
 import TransferFunctionSelector from './TransferFunctionSelector';
 import { AudioEngine } from './AudioEngine';
+import ABCNotationPlayer from './ABCNotationPlayer';
 
 function App() {
   const [audioEngine] = useState(() => new AudioEngine());
   const [isTimbreExpanded, setIsTimbreExpanded] = useState(false);
   const [isTransferExpanded, setIsTransferExpanded] = useState(false);
+  const [isABCExpanded, setIsABCExpanded] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTimbreChange = (_timbre: Timbre) => {
@@ -50,6 +52,19 @@ function App() {
           {isTransferExpanded && (
             <div className="mt-4">
               <TransferFunctionSelector audioEngine={audioEngine} onTransferFunctionChange={handleTransferFunctionChange} />
+            </div>
+          )}
+        </div>
+        <div className="w-full max-w-4xl">
+          <button
+            onClick={() => setIsABCExpanded(!isABCExpanded)}
+            className="w-full text-left p-4 bg-white dark:bg-slate-800 rounded-lg shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <h2 className="text-xl font-semibold">乐谱编辑器 {isABCExpanded ? '▼' : '▶'}</h2>
+          </button>
+          {isABCExpanded && (
+            <div className="mt-4">
+              <ABCNotationPlayer audioEngine={audioEngine} />
             </div>
           )}
         </div>

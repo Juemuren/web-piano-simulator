@@ -15,3 +15,17 @@ export interface TransferFunction {
   magnitudes: number[];
   phases: number[];
 }
+
+export interface ABCNote {
+  pitch: number;
+  duration: number;
+  startTime: number;
+}
+
+export interface ABCScore {
+  title?: string;
+  key: string;
+  meter: string;
+  notes: ABCNote[];
+  tempo?: number;
+}
