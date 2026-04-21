@@ -16,16 +16,18 @@ $$p(t) = \sum_{n=1}^{N}A_n\sin(2\pi n f_1 t)$$
 
 ### 音色预设
 
-对于击弦，取归一化的弦长度，让击弦点和左端点的距离为 $\lambda$，可以得到
+取归一化的弦长度，设击弦点和左端点的距离为 $\lambda$，可以得到
 
 $$A_n \propto \frac{1}{n^2} \left|\sin  n\pi \lambda\right|$$
 
 这就是通常击弦时产生的音色。而
 
-- 空灵 $A_n \propto \frac{1}{n^2} \left|\sin\frac{n\pi}{2}\right|$
-- 金属 $A_n \propto \frac{1}{n}$
+| 效果 | 击弦点                     | 振幅                                               |
+| ---- | -------------------------- | -------------------------------------------------- |
+| 空灵 | $0.5$                      | $A_n \propto \frac{1}{n^2} \|\sin\frac{n\pi}{2}\|$ |
+| 金属 | $\approx 0$ 或 $\approx 1$ | $A_n \propto \frac{1}{n}$                          |
 
-都是通常击弦产生的某种特殊情况。
+都是通常击弦的特殊情况。
 
 ### 传递函数预设
 
@@ -77,3 +79,4 @@ $$\angle H(\omega) = -\arctan(\frac{\alpha\sin\omega}{1 + \alpha\cos\omega})$$
 - TypeScript
 - Vite
 - Tailwind CSS
+- abcjs
