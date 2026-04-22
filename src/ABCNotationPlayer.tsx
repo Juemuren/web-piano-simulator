@@ -110,24 +110,14 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex justify-center mb-4">
           {parsedScore && (
-            <>
-              <button
-                onClick={handlePlay}
-                disabled={isPlaying}
-                className="px-4 py-2 bg-green-600 text-white rounded-2xl hover:bg-green-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
-              >
-                {isPlaying ? '播放中...' : '播放'}
-              </button>
-
-              <button
-                onClick={handleStop}
-                className="px-4 py-2 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-colors"
-              >
-                停止
-              </button>
-            </>
+            <button
+              onClick={isPlaying ? handleStop : handlePlay}
+              className={`px-4 py-2 text-white rounded-2xl transition-colors ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+            >
+              {isPlaying ? '停止播放' : '开始播放'}
+            </button>
           )}
         </div>
 
