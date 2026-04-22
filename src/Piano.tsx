@@ -43,7 +43,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
   };
 
   const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const numKeys = Math.min(37, Math.floor(windowWidth / 30));
+  const numKeys = Math.min(37, Math.max(13, Math.floor(windowWidth / 30)));
   const centerNote = 66; // F#4
   const startNote = centerNote - Math.floor((numKeys - 1) / 2);
   const keys = Array.from({ length: numKeys }, (_, index) => {
@@ -52,8 +52,9 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
     const octave = Math.floor(note / 12) - 1;
     return {
       note,
-      label: name,
-      number: octave
+      char: name[0],
+      number: octave,
+      isBlack: name.includes('#')
     };
   });
 
@@ -62,7 +63,6 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
       <div className="flex justify-center">
         {keys.map((key) => {
           const isPressed = pressedKeys.has(key.note) || playingNotes.has(key.note);
-          const isBlack = key.label.includes('#');
           return (
             <button
               key={key.note}
@@ -73,21 +73,25 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
               onTouchEnd={(e) => handleKeyUp(e, key.note)}
               onTouchCancel={(e) => handleKeyUp(e, key.note)}
               className={`text-xs w-6 h-37.5 border border-black transition-all duration-100 ${
-                isBlack
+                key.isBlack
                   ? isPressed
-                    ? 'bg-gray-800 text-white shadow-inner'
+                    ? 'bg-blue-800 text-white shadow-inner'
                     : 'bg-black text-white'
                   : isPressed
-                  ? 'bg-gray-200 text-black shadow-inner'
+                  ? 'bg-blue-200 text-black shadow-inner'
                   : 'bg-white text-black'
               }`}
               style={{
                 transform: isPressed ? 'translateY(2px)' : 'translateY(0px)',
               }}
             >
-              {key.label}
-              <br />
-              {key.number}
+              <span className="items-baseline">
+                {key.char}
+                <span className="inline-flex flex-col">
+                  {key.isBlack && <sup className="-top-2">#</sup>}
+                  <sub>{key.number}</sub>
+                </span>
+              </span>
             </button>
           );
         })}
