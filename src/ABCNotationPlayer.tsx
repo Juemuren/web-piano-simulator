@@ -100,17 +100,15 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   return (
     <div className="w-full max-w-4xl">
       <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
-        <div className="mb-4">
-          <textarea
-            id="abc-input"
-            value={abcInput}
-            onChange={(e) => setAbcInput(e.target.value)}
-            placeholder='输入乐谱'
-            className="w-full h-48 p-3 border border-slate-700 rounded-3xl bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
-          />
-        </div>
+        <textarea
+          id="abc-input"
+          value={abcInput}
+          onChange={(e) => setAbcInput(e.target.value)}
+          placeholder='输入乐谱'
+          className="w-full h-48 p-3 mb-4 border text-sm border-slate-700 bg-slate-100 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+        />
 
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center">
           {parsedScore && (
             <button
               onClick={isPlaying ? handleStop : handlePlay}
