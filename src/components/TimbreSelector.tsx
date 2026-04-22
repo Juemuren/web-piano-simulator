@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import type { TimbrePreset, Timbre } from './types';
-import { generatePresetTimbre } from './AudioPresets';
-import { AudioEngine } from './AudioEngine';
+import type { TimbrePreset, Timbre } from '../types';
+import { generatePresetTimbre } from '../services/audio/AudioPresets';
+import { AudioEngine } from '../services/audio/AudioEngine';
 
 interface TimbreSelectorProps {
   audioEngine: AudioEngine;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import type { TransferFunctionPreset, TransferFunction } from './types';
-import { generatePresetTransferFunction } from './AudioPresets';
-import { AudioEngine } from './AudioEngine';
+import type { TransferFunctionPreset, TransferFunction } from '../types';
+import { generatePresetTransferFunction } from '../services/audio/AudioPresets';
+import { AudioEngine } from '../services/audio/AudioEngine';
 
 interface TransferFunctionSelectorProps {
   audioEngine: AudioEngine;

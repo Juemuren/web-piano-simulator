@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AudioEngine } from './AudioEngine';
+import { AudioEngine } from '../services/audio/AudioEngine';
 
 interface PianoProps {
   audioEngine: AudioEngine;

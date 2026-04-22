@@ -1,7 +1,7 @@
 import type {
   TransferFunction, TransferFunctionPreset,
   Timbre, TimbrePreset
-} from './types';
+} from '../../types';
 
 export const normalizeAngle = (angle: number) => (((angle % 360) + 540) % 360) - 180;
 

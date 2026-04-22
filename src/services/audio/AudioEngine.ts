@@ -1,4 +1,4 @@
-import type { TransferFunction, Timbre } from './types';
+import type { TransferFunction, Timbre } from '../../types';
 import {
   computeTransferFunctionForHarmonics,
   generatePresetTimbre,

@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
-import Piano from './Piano';
-import TimbreSelector from './TimbreSelector';
-import TransferFunctionSelector from './TransferFunctionSelector';
-import { AudioEngine } from './AudioEngine';
-import ABCNotationPlayer from './ABCNotationPlayer';
-import CollapsibleSection from './CollapsibleSection';
+import { AudioEngine } from './services/audio/AudioEngine';
+import Piano from './components/Piano';
+import TimbreSelector from './components/TimbreSelector';
+import TransferFunctionSelector from './components/TransferFunctionSelector';
+import ABCNotationPlayer from './components/ABCNotationPlayer';
+import CollapsibleSection from './components/CollapsibleSection';
 
 function App() {
   const [audioEngine] = useState(() => new AudioEngine());

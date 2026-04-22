@@ -1,5 +1,5 @@
 import { parseOnly } from 'abcjs';
-import type { ABCNote, ABCScore } from './types';
+import type { ABCNote, ABCScore } from '../../types';
 
 interface ABCPitch {
   pitch?: number;

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
-import { ABCParser } from './ABCParser';
-import { ABCPlayer } from './ABCPlayer';
-import { AudioEngine } from './AudioEngine';
+import { ABCParser } from '../services/abc/ABCParser';
+import { ABCPlayer } from '../services/abc/ABCPlayer';
+import { AudioEngine } from '../services/audio/AudioEngine';
 
 interface ABCNotationPlayerProps {
   audioEngine: AudioEngine;

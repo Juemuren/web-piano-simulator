@@ -1,5 +1,5 @@
-import { AudioEngine } from './AudioEngine';
-import type { ABCScore } from './types';
+import { AudioEngine } from '../audio/AudioEngine';
+import type { ABCScore } from '../../types';
 
 export class ABCPlayer {
   private audioEngine: AudioEngine;
