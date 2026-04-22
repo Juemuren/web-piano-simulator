@@ -23,7 +23,9 @@ export class ABCParser {
 
       const notes: ABCNote[] = [];
       let currentTime = 0;
-      const voice = staff?.voices?.[0];
+      const voice = tune.lines
+        ?.flatMap(line => line.staff?.[0].voices?.[0])
+        .filter(el => el !== undefined);
 
       if (voice) {
         for (const element of voice) {
