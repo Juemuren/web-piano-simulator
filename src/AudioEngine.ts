@@ -10,10 +10,6 @@ export class AudioEngine {
   private activeOscillators: OscillatorNode[] = [];
   private activeGains: GainNode[] = [];
 
-  constructor() {
-    // 初始化
-  }
-
   // 生成预设音色
   static generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lambda?: number): Timbre {
     const harmonics = 10;

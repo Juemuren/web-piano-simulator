@@ -4,12 +4,11 @@ import { AudioEngine } from './AudioEngine';
 
 interface TimbreSelectorProps {
   audioEngine: AudioEngine;
-  onTimbreChange: (timbre: Timbre) => void;
 }
 
 const defaultLambda = 0.5;
 
-const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine, onTimbreChange }) => {
+const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
   const [selectedPreset, setSelectedPreset] = useState<TimbrePreset>('normal');
   const [lambda, setLambda] = useState(defaultLambda);
   const [amplitudes, setAmplitudes] = useState<number[]>(() => AudioEngine.generatePresetTimbre('normal', defaultLambda).amplitudes);
@@ -20,8 +19,7 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine, onTimbreCh
       amplitudes,
     };
     audioEngine.setTimbre(timbre);
-    onTimbreChange(timbre);
-  }, [selectedPreset, amplitudes, audioEngine, onTimbreChange]);
+  }, [selectedPreset, amplitudes, audioEngine]);
 
   const handlePresetChange = (preset: TimbrePreset) => {
     setSelectedPreset(preset);

@@ -4,17 +4,15 @@ import { AudioEngine } from './AudioEngine';
 
 interface TransferFunctionSelectorProps {
   audioEngine: AudioEngine;
-  onTransferFunctionChange: (tf: TransferFunction) => void;
 }
 
-const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ audioEngine, onTransferFunctionChange }) => {
+const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ audioEngine }) => {
   const [transferFunction, setTransferFunction] = useState<TransferFunction>(() => AudioEngine.generatePresetTransferFunction('delay', 0, 0, 440));
   const selectedPreset = transferFunction.type;
 
   useEffect(() => {
     audioEngine.setTransferFunction(transferFunction);
-    onTransferFunctionChange(transferFunction);
-  }, [transferFunction, audioEngine, onTransferFunctionChange]);
+  }, [transferFunction, audioEngine]);
 
   const handlePresetChange = (preset: TransferFunctionPreset) => {
     if (preset === 'custom') {

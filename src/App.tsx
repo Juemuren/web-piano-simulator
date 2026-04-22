@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import Piano from './Piano';
-import type { TransferFunction, Timbre } from './types';
 import TimbreSelector from './TimbreSelector';
 import TransferFunctionSelector from './TransferFunctionSelector';
 import { AudioEngine } from './AudioEngine';
@@ -10,16 +9,6 @@ import CollapsibleSection from './CollapsibleSection';
 function App() {
   const [audioEngine] = useState(() => new AudioEngine());
   const [playingNotes, setPlayingNotes] = useState<Set<number>>(new Set());
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleTimbreChange = (_timbre: Timbre) => {
-    // 处理音色变化
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleTransferFunctionChange = (_tf: TransferFunction) => {
-    // 处理传递函数变化
-  };
 
   const handleNoteStart = useCallback((pitch: number) => {
     setPlayingNotes(prev => {
@@ -51,13 +40,11 @@ function App() {
         <CollapsibleSection title="音色调节器">
           <TimbreSelector
             audioEngine={audioEngine}
-            onTimbreChange={handleTimbreChange}
           />
         </CollapsibleSection>
         <CollapsibleSection title="传递函数调节器">
           <TransferFunctionSelector
             audioEngine={audioEngine}
-            onTransferFunctionChange={handleTransferFunctionChange}
           />
         </CollapsibleSection>
         <CollapsibleSection title="乐谱编辑器">
