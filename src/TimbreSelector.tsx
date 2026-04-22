@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { TimbrePreset, Timbre } from './types';
+import { generatePresetTimbre } from './AudioPresets';
 import { AudioEngine } from './AudioEngine';
 
 interface TimbreSelectorProps {
@@ -11,7 +12,7 @@ const defaultLambda = 0.5;
 const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
   const [selectedPreset, setSelectedPreset] = useState<TimbrePreset>('normal');
   const [lambda, setLambda] = useState(defaultLambda);
-  const [amplitudes, setAmplitudes] = useState<number[]>(() => AudioEngine.generatePresetTimbre('normal', defaultLambda).amplitudes);
+  const [amplitudes, setAmplitudes] = useState<number[]>(() => generatePresetTimbre('normal', defaultLambda).amplitudes);
 
   useEffect(() => {
     const timbre: Timbre = {
@@ -24,7 +25,7 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
   const handlePresetChange = (preset: TimbrePreset) => {
     setSelectedPreset(preset);
     if (preset !== 'custom') {
-      const presetTimbre = AudioEngine.generatePresetTimbre(preset, preset === 'normal' ? lambda : undefined);
+      const presetTimbre = generatePresetTimbre(preset, preset === 'normal' ? lambda : undefined);
       setAmplitudes(presetTimbre.amplitudes);
     }
   };
@@ -33,7 +34,7 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
     const value = parseFloat(e.target.value);
     setLambda(value);
     if (selectedPreset === 'normal') {
-      const presetTimbre = AudioEngine.generatePresetTimbre('normal', value);
+      const presetTimbre = generatePresetTimbre('normal', value);
       setAmplitudes(presetTimbre.amplitudes);
     }
   };

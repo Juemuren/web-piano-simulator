@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { TransferFunctionPreset, TransferFunction } from './types';
+import { generatePresetTransferFunction } from './AudioPresets';
 import { AudioEngine } from './AudioEngine';
 
 interface TransferFunctionSelectorProps {
@@ -7,7 +8,7 @@ interface TransferFunctionSelectorProps {
 }
 
 const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ audioEngine }) => {
-  const [transferFunction, setTransferFunction] = useState<TransferFunction>(() => AudioEngine.generatePresetTransferFunction('delay', 0, 0, 440));
+  const [transferFunction, setTransferFunction] = useState<TransferFunction>(() => generatePresetTransferFunction('delay', 0, 0, 440));
   const selectedPreset = transferFunction.type;
 
   useEffect(() => {
@@ -20,14 +21,14 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
       return;
     }
 
-    setTransferFunction((prev) => AudioEngine.generatePresetTransferFunction(preset, prev.tau, prev.alpha, prev.fc));
+    setTransferFunction((prev) => generatePresetTransferFunction(preset, prev.tau, prev.alpha, prev.fc));
   };
 
   const updatePresetParams = (updates: Partial<Pick<TransferFunction, 'tau' | 'alpha' | 'fc'>>) => {
     if (transferFunction.type === 'custom') return;
     setTransferFunction((prev) => {
       if (prev.type === 'custom') return prev;
-      return AudioEngine.generatePresetTransferFunction(prev.type, updates.tau ?? prev.tau, updates.alpha ?? prev.alpha, updates.fc ?? prev.fc);
+      return generatePresetTransferFunction(prev.type, updates.tau ?? prev.tau, updates.alpha ?? prev.alpha, updates.fc ?? prev.fc);
     });
   };
 
