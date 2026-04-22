@@ -1,0 +1,26 @@
+[
+  {
+    "T": "小星星",
+    "M": "4/4",
+    "L": "1/4",
+    "K": "C",
+    "Q": 120,
+    "body": "C C G G | A A G2 || F F E E | D D C2 ||\nG G F F | E E D2 || G G F F | E E D2 ||\nC C G G | A A G2 || F F E E | D D C2 |]"
+  },
+  {
+    "T": "生日快乐",
+    "M": "3/4",
+    "L": "1/4",
+    "K": "C",
+    "Q": 63,
+    "body": "C/2C/2 D C | F E2 || C/2C/2 D C | G F2 ||\nC/2C/2 c A | F E2 || A/2A/2 A F | G F2 |]"
+  },
+  {
+    "T": "春日影",
+    "M": "6/8",
+    "L": "1/8",
+    "K": "C",
+    "Q": 97,
+    "body": "e2 d c2 d | e3/2f/2 e d3 | e2 d c2 d | e3/2f/2 e d3 |]"
+  }
+]
