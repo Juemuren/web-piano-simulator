@@ -33,7 +33,8 @@ export class ABCParser {
             const pitch = element.pitches[0];
             const midiNote = this.pitchToMidi(pitch);
             const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
-            const duration = this.durationToSeconds(rawDuration, tempo);
+            const meterDen = meterValue?.den ?? 8
+            const duration = this.durationToSeconds(rawDuration, meterDen, tempo);
 
             notes.push({
               pitch: midiNote,
@@ -82,9 +83,10 @@ export class ABCParser {
     return 60 + correctedPos + accValue;
   }
 
-  private static durationToSeconds(duration: number, tempo: number): number {
-    const secondsPerWholeNote = 240 / tempo;
-    const result = duration * secondsPerWholeNote;
+  private static durationToSeconds(duration: number, meterDen: number, tempo: number): number {
+    const secondsPerWholeNote = 60 / tempo;
+    // 音符时长 = 音符初始时长 * 拍号分母 * 单位音符时长
+    const result = duration * meterDen * secondsPerWholeNote;
     return Math.max(result, 0.1);
   }
 }
