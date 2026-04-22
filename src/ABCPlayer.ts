@@ -50,7 +50,6 @@ export class ABCPlayer {
     this.isPlaying = false;
     this.currentTimeoutIds.forEach(id => clearTimeout(id));
     this.currentTimeoutIds = [];
-    this.audioEngine.stopAll();
   }
 
   isCurrentlyPlaying(): boolean {

@@ -200,15 +200,21 @@ export class AudioEngine {
 
       // 为高频谐波设置更快的衰减
       const releaseTime = baseReleaseTime / Math.sqrt(n);
-      const stopTime = this.audioContext.currentTime + duration + releaseTime
 
       // 相位延迟
       const phaseDeg = phases[n - 1] || 0;
       const phaseDelay = phaseDeg / (360 * freq);
       const startTime = Math.max(0, this.audioContext.currentTime + phaseDelay);
+      const stopTime = startTime + duration + releaseTime;
 
-      gain.gain.setValueAtTime(amplitude, startTime);
-      gain.gain.exponentialRampToValueAtTime(0.00001, stopTime);
+      const attackTime = 0.005;
+      const initialGain = 0.00001;
+      const targetGain = Math.max(amplitude, initialGain);
+
+      gain.gain.setValueAtTime(initialGain, this.audioContext.currentTime);
+      gain.gain.setValueAtTime(initialGain, startTime);
+      gain.gain.exponentialRampToValueAtTime(targetGain, startTime + attackTime);
+      gain.gain.exponentialRampToValueAtTime(initialGain, stopTime);
 
       osc.connect(gain);
       gain.connect(this.audioContext.destination);
@@ -227,33 +233,5 @@ export class AudioEngine {
       osc.start(startTime);
       osc.stop(stopTime);
     }
-  }
-
-  // 停止所有声音
-  stopAll() {
-    if (!this.audioContext) return;
-
-    this.activeOscillators.forEach((osc) => {
-      try {
-        osc.stop();
-      } catch {
-        // 已经停止时忽略
-      }
-      try {
-        osc.disconnect();
-      } catch {
-        // 忽略可能的断开错误
-      }
-    });
-    this.activeGains.forEach((gain) => {
-      try {
-        gain.disconnect();
-      } catch {
-        // 忽略可能的断开错误
-      }
-    });
-    this.activeOscillators = [];
-    this.activeGains = [];
-    this.audioContext.suspend();
   }
 }
