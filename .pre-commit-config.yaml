@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: npm-build
+        name: Npm Build
+        entry: npm run build
+        language: node
+        pass_filenames: false
+      - id: npm-lint
+        name: Npm Lint
+        entry: npm run lint
+        language: node
+        pass_filenames: false
