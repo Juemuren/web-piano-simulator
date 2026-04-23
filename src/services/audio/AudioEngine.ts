@@ -7,7 +7,7 @@ import {
 
 export class AudioEngine {
   private audioContext: AudioContext | null = null;
-  private currentTimbre: Timbre = generatePresetTimbre('normal', 0.5);
+  private currentTimbre: Timbre = generatePresetTimbre('ethereal', 0.5);
   private currentTransferFunction: TransferFunction = generatePresetTransferFunction('delay', 0, 0, 2000);
   private activeOscillators: OscillatorNode[] = [];
   private activeGains: GainNode[] = [];

@@ -16,42 +16,19 @@ $$p(t) = \sum_{n=1}^{N}A_n\sin(2\pi n f_1 t)$$
 
 ### 音色预设
 
-取归一化的弦长度，设击弦点和左端点的距离为 $\lambda$，可以得到
-
-$$A_n \propto \frac{1}{n^2} \left|\sin  n\pi \lambda\right|$$
-
-这就是通常击弦时产生的音色。而
-
-| 效果 | 击弦点                     | 振幅                                               |
-| ---- | -------------------------- | -------------------------------------------------- |
-| 空灵 | $0.5$                      | $A_n \propto \frac{1}{n^2} \|\sin\frac{n\pi}{2}\|$ |
-| 金属 | $\approx 0$ 或 $\approx 1$ | $A_n \propto \frac{1}{n}$                          |
-
-都是通常击弦的特殊情况。
+| 音色 | 谐波振幅关系                                     | 参数                       |
+| ---- | ------------------------------------------------ | -------------------------- |
+| 金属 | $A_n \propto \frac1n$                            | 无                         |
+| 纯净 | $A_n \propto \frac1{n^2}$                        | 无                         |
+| 明亮 | $A_n \propto \frac1n \|\sin\frac{n\pi}2\|$       | 无                         |
+| 空灵 | $A_n \propto \frac{1}{n^2} \|\sin\frac{n\pi}2\|$ | 无                         |
+| 柔和 | $A_n \propto e^{-\sigma n}$                      | 衰减率 $\sigma$            |
+| 常规 | $A_n \propto \frac1{n^2} \sin(n\pi \lambda)$     | 击弦点 $\lambda$           |
+| 真实 | $A_n \propto \frac1{n^p} e^{-\sigma n}$          | 幂指数 $p$ 衰减率 $\sigma$ |
 
 ### 传递函数预设
 
-纯延时、单回声、多回声和全通都有清晰的时域解释。以单回声为例，其时域关系为
-
-$$y(t) = x(t) + \alpha x(t-\tau)$$
-
-对两侧同时傅里叶变换
-
-$$Y(\omega) = \left(1 + \alpha e^{-j\omega\tau}\right) X(\omega)$$
-
-由传递函数的定义
-
-$$H(\omega) = \frac{Y(\omega)}{X(\omega)} = 1 + \alpha e^{-j\omega\tau}$$
-
-计算 $|H(\omega)|$
-
-$$|H(\omega)| = \sqrt{1 + \alpha^2 + 2\alpha\cos\omega}$$
-
-计算 $\angle H(\omega)$
-
-$$\angle H(\omega) = -\arctan(\frac{\alpha\sin\omega}{1 + \alpha\cos\omega})$$
-
-代入 $\omega = 2\pi f$ 即可得到幅频特性和相频特性
+纯延时、单回声、多回声和全通都有清晰的时域解释
 
 | 效果   | 时域解释                                            | 传递函数                                                        | 幅频特性                                                | 相频特性                                                                            |
 | ------ | --------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -60,7 +37,7 @@ $$\angle H(\omega) = -\arctan(\frac{\alpha\sin\omega}{1 + \alpha\cos\omega})$$
 | 多回声 | $y(t) = \sum_{k=0}^{\infty} \alpha^k x(t - k\tau)$  | $\sum_{k=0}^{\infty} \left( \alpha e^{-j\omega \tau} \right)^k$ | $\frac1{\sqrt{1 + \alpha^2 - 2\alpha\cos(2\pi\tau f)}}$ | $-\arctan(\frac{\alpha\sin(2\pi\tau f)}{1 - \alpha\cos(2\pi\tau f)})$               |
 | 全通   | $y(t) = \alpha x(t) + x(t-\tau) - \alpha y(t-\tau)$ | $\frac{\alpha + e^{-j\omega\tau}}{1 + \alpha e^{-j\omega\tau}}$ | $1$                                                     | $-2\pi\tau f - 2\arctan(\frac{\alpha\sin(2\pi\tau f)}{1 - \alpha\cos(2\pi\tau f)})$ |
 
-其中 $\tau$ 的物理含义为延迟时间，而 $\alpha$ 的物理含义为衰减系数
+其中 $\tau$ 为延迟时间，而 $\alpha$ 为衰减系数
 
 理想低通和理想高通的幅频特性和相频特性不需要通过时域解释进行推导
 
@@ -69,7 +46,7 @@ $$\angle H(\omega) = -\arctan(\frac{\alpha\sin\omega}{1 + \alpha\cos\omega})$$
 | 低通 | $[f \le f_c]$ | $0$      |
 | 高通 | $[f \ge f_c]$ | $0$      |
 
-其中 $f_c$ 的物理含义为频率阈值
+其中 $f_c$ 为频率阈值
 
 ## 技术栈
 

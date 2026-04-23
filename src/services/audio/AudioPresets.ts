@@ -5,7 +5,7 @@ import type {
 
 export const normalizeAngle = (angle: number) => (((angle % 360) + 540) % 360) - 180;
 
-export function generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lambda?: number): Timbre {
+export function generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lambda?: number, sigma?: number, p?: number): Timbre {
   const harmonics = 10;
   const amplitudes: number[] = [];
 
@@ -20,6 +20,18 @@ export function generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lamb
         break;
       case 'normal':
         amp = (1 / (n * n)) * Math.abs(Math.sin(n * Math.PI * (lambda ?? 0.5)));
+        break;
+      case 'pure':
+        amp = 1 / (n * n);
+        break;
+      case 'bright':
+        amp = (1 / n) * Math.abs(Math.sin((n * Math.PI) / 2));
+        break;
+      case 'soft':
+        amp = Math.exp(-(sigma ?? 0.1) * n);
+        break;
+      case 'realistic':
+        amp = (1 / Math.pow(n, p ?? 2)) * Math.exp(-(sigma ?? 0.1) * n);
         break;
     }
     amplitudes.push(amp);

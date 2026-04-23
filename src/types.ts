@@ -1,4 +1,4 @@
-export type TimbrePreset = 'ethereal' | 'metallic' | 'normal' | 'custom';
+export type TimbrePreset = 'ethereal' | 'metallic' | 'pure' | 'bright' | 'normal' | 'soft' | 'realistic' | 'custom';
 
 export interface Timbre {
   type: TimbrePreset;
