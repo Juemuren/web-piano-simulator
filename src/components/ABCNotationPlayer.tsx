@@ -14,6 +14,7 @@ interface ABCNotationPlayerProps {
 
 export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd, onStop }: ABCNotationPlayerProps) {
   const [abcPlayer] = useState(() => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd));
+  const [abcParser] = useState(() => new ABCParser())
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<ABCPreset | null>(null);
   const [header, setHeader] = useState({ T: '', M: '4/4', L: '1/4', K: 'C', Q: 120 });
@@ -33,8 +34,8 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const abcInputMemo = useMemo(() => formatHeaderToABC(header) + body, [header, body]);
 
   const parsedNotes = useMemo(() => {
-    return ABCParser.parse(abcInputMemo);
-  }, [abcInputMemo]);
+    return abcParser.parse(abcInputMemo);
+  }, [abcInputMemo, abcParser]);
 
   useEffect(() => {
     if (!notationRef.current) return;
