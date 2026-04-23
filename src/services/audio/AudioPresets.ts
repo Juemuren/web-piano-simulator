@@ -100,7 +100,7 @@ export function generatePresetTransferFunction(
   type: Exclude<TransferFunctionPreset, 'custom'>,
   tau: number = 0,
   alpha: number = 0,
-  fc: number = 440,
+  fc: number = 2000,
 ): TransferFunction {
   const { magnitudes, phases } = computeTransferFunctionForHarmonics(type, tau, alpha, fc, 440);
   return {

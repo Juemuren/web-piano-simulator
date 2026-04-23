@@ -8,7 +8,7 @@ interface TransferFunctionSelectorProps {
 }
 
 const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ audioEngine }) => {
-  const [transferFunction, setTransferFunction] = useState<TransferFunction>(() => generatePresetTransferFunction('delay', 0, 0, 440));
+  const [transferFunction, setTransferFunction] = useState<TransferFunction>(() => generatePresetTransferFunction('delay', 0, 0, 2000));
   const selectedPreset = transferFunction.type;
 
   useEffect(() => {

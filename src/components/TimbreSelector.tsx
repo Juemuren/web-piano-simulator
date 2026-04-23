@@ -7,12 +7,10 @@ interface TimbreSelectorProps {
   audioEngine: AudioEngine;
 }
 
-const defaultLambda = 0.5;
-
 const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
   const [selectedPreset, setSelectedPreset] = useState<TimbrePreset>('normal');
-  const [lambda, setLambda] = useState(defaultLambda);
-  const [amplitudes, setAmplitudes] = useState<number[]>(() => generatePresetTimbre('normal', defaultLambda).amplitudes);
+  const [lambda, setLambda] = useState(0.5);
+  const [amplitudes, setAmplitudes] = useState<number[]>(() => generatePresetTimbre('normal', 0.5).amplitudes);
 
   useEffect(() => {
     const timbre: Timbre = {
@@ -68,7 +66,7 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
           >
             <option value="ethereal">空灵</option>
             <option value="metallic">金属</option>
-            <option value="normal">通常</option>
+            <option value="normal">常规</option>
             <option value="custom">自定义</option>
           </select>
         </div>

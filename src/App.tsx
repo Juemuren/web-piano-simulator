@@ -48,7 +48,7 @@ function App() {
             audioEngine={audioEngine}
           />
         </CollapsibleSection>
-        <CollapsibleSection title="传递函数调节器">
+        <CollapsibleSection title="传递函数修改器">
           <TransferFunctionSelector
             audioEngine={audioEngine}
           />
