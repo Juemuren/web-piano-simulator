@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { type AbcElem, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
-import { pitchToMidi } from '../services/abc/ABCHelper';
+import { playSingleAbcElem } from '../services/abc/ABCHelper';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { type ABCPreset, presets, formatHeaderToABC } from '../services/abc/ABCPresets';
 
@@ -45,19 +45,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
     if (parsedNotes) {
       const clickListener = async (abcElem: AbcElem) => {
-        const abcPitch = abcElem.pitches?.[0]
-        const noteNumber = pitchToMidi({
-          name: abcPitch?.name,
-          pitch: abcPitch?.pitch,
-          verticalPos: abcPitch?.verticalPos,
-          accidental: abcPitch?.accidental
-        }, abcParser.accidentals)
-        const duration = abcElem.duration
-        onNoteStart(noteNumber)
-        audioEngine.playNote(noteNumber, duration)
-        setTimeout(() => {
-          onNoteEnd(noteNumber)
-        }, duration * 1000);
+        playSingleAbcElem(abcElem, abcParser.accidentals, audioEngine, onNoteStart, onNoteEnd);
       };
 
       const visualObjs = renderAbc(notationRef.current, abcInputMemo, {

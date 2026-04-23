@@ -26,17 +26,27 @@ export class ABCParser {
 
       if (voice) {
         for (const element of voice) {
-          if (element.el_type === 'note' && element.pitches && element.pitches.length > 0) {
+          if (element.el_type === 'note') {
             const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
             const duration = durationToSeconds(rawDuration, meterDen, tempo);
-            element.pitches.forEach(pitch => {
-              const midiNote = pitchToMidi(pitch, this.accidentals);
-              notes.push({
-                pitch: midiNote,
-                duration,
-                startTime: currentTime
+            if (element.pitches && element.pitches.length > 0) {
+              element.pitches.forEach(pitch => {
+                const midiNote = pitchToMidi(pitch, this.accidentals);
+                notes.push({
+                  pitch: midiNote,
+                  duration,
+                  startTime: currentTime,
+                  isRest: false
+                });
               });
-            });
+            } else if (element.rest) {
+              notes.push({
+                pitch: 0,
+                duration,
+                startTime: currentTime,
+                isRest: true
+              });
+            }
             currentTime += duration;
           }
         }

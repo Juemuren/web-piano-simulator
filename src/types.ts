@@ -20,4 +20,5 @@ export interface ABCNote {
   pitch: number;
   duration: number;
   startTime: number;
+  isRest?: boolean;
 }

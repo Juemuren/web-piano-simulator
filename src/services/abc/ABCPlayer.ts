@@ -23,6 +23,9 @@ export class ABCPlayer {
     this.currentTimeoutIds = [];
 
     for (const note of notes) {
+      if (note.isRest) {
+        continue;
+      }
       const startTimeoutId = window.setTimeout(() => {
         if (this.isPlaying) {
           this.onNoteStart?.(note.pitch);

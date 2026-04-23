@@ -1,4 +1,5 @@
-import { type Accidental, type AccidentalName } from 'abcjs';
+import { type Accidental, type AccidentalName, type AbcElem } from 'abcjs';
+import { AudioEngine } from '../audio/AudioEngine';
 
 export interface ABCPitch {
   pitch?: number;
@@ -51,4 +52,30 @@ export function durationToSeconds(duration: number, meterDen: number, tempo: num
   // 音符时长 = 音符节拍数 * 每节拍秒数
   const result = beatsForNotes * secondsPerBeats;
   return Math.max(result, 0.1);
+}
+
+export function playSingleAbcElem(
+  abcElem: AbcElem,
+  accidentals: Accidental[],
+  audioEngine: AudioEngine,
+  onNoteStart: (pitch: number) => void,
+  onNoteEnd: (pitch: number) => void
+) {
+  if (abcElem.pitches && abcElem.pitches.length > 0) {
+    const abcPitch = abcElem.pitches[0];
+    const noteNumber = pitchToMidi({
+      name: abcPitch.name,
+      pitch: abcPitch.pitch,
+      verticalPos: abcPitch.verticalPos,
+      accidental: abcPitch.accidental
+    }, accidentals);
+    const duration = abcElem.duration;
+    onNoteStart(noteNumber);
+    audioEngine.playNote(noteNumber, duration);
+    setTimeout(() => {
+      onNoteEnd(noteNumber);
+    }, duration * 1000);
+  } else if (abcElem.rest) {
+    return
+  }
 }
