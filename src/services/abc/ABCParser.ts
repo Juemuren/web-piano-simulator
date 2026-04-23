@@ -1,11 +1,11 @@
-import { parseOnly } from 'abcjs';
+import { type Accidental, type AccidentalName, parseOnly } from 'abcjs';
 import type { ABCNote, ABCScore } from '../../types';
 
 interface ABCPitch {
   pitch?: number;
   name?: string;
   verticalPos?: number;
-  accidental?: string | number;
+  accidental?: AccidentalName;
 }
 
 export class ABCParser {
@@ -16,8 +16,8 @@ export class ABCParser {
       if (!tune) return null;
       const title = tune.metaText?.title ?? '';
       const tempo = tune.metaText?.tempo?.bpm ?? 120;
-      const staff = tune.lines?.[0]?.staff?.[0];
-      const key = staff?.key?.root ?? 'C';
+      const meterDen = tune.getMeterFraction()?.den ?? 8
+      const accidentals = tune.getKeySignature()?.accidentals ?? []
 
       const notes: ABCNote[] = [];
       let currentTime = 0;
@@ -29,10 +29,9 @@ export class ABCParser {
         for (const element of voice) {
           if (element.el_type === 'note' && element.pitches && element.pitches.length > 0) {
             const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
-            const meterDen = tune.getMeterFraction()?.den ?? 8
             const duration = this.durationToSeconds(rawDuration, meterDen, tempo);
             element.pitches.forEach(pitch => {
-              const midiNote = this.pitchToMidi(pitch);
+              const midiNote = this.pitchToMidi(pitch, accidentals);
               notes.push({
                 pitch: midiNote,
                 duration,
@@ -46,7 +45,6 @@ export class ABCParser {
 
       return {
         title,
-        key,
         notes,
         tempo
       };
@@ -56,30 +54,42 @@ export class ABCParser {
     }
   }
 
-  private static pitchToMidi(pitch: ABCPitch): number {
+  private static pitchToMidi(pitch: ABCPitch, accidentals: Accidental[]): number {
+    const defaultNotes = 60 // C4
     const octave_offset = [0, 2, 4, 5, 7, 9, 11];
-    const currentNotes = pitch?.verticalPos ?? 60
+    const currentNotes = pitch?.verticalPos ?? defaultNotes
     const octave = Math.floor(currentNotes / 7);
     const idx = ((currentNotes % 7) + 7) % 7;
     const correctedPos = octave * 12 + octave_offset[idx];
 
-    let accValue = 0;
-    if (typeof pitch.accidental === 'string') {
-      switch (pitch.accidental) {
-        case 'sharp': accValue = 1; break;
-        case 'flat': accValue = -1; break;
-        case 'dblsharp': accValue = 2; break;
-        case 'dblflat': accValue = -2; break;
-        case 'quartersharp': accValue = 0.5; break;
-        case 'quarterflat': accValue = -0.5; break;
-        case 'natural': accValue = 0; break;
-        default: accValue = 0;
-      }
-    } else if (typeof pitch.accidental === 'number') {
-      accValue = pitch.accidental;
+    const accidentalMap: Record<string, number> = {};
+    accidentals.forEach(({ acc, note }) => {
+      const accChange = this.semitoneShift(acc)
+      accidentalMap[note.toLowerCase()] = accChange;
+    });
+
+    let accChange = 0;
+    if (pitch?.accidental) {
+      accChange = this.semitoneShift(pitch.accidental)
+    } else {
+      const noteName = pitch?.name?.[0]?.toLowerCase() ?? 'c';
+      accChange = accidentalMap[noteName] || 0;
     }
 
-    return 60 + correctedPos + accValue;
+    return defaultNotes + correctedPos + accChange;
+  }
+
+  private static semitoneShift(acc: AccidentalName): number {
+    let change = 0;
+    switch (acc) {
+      case 'sharp': change = 1; break;
+      case 'flat': change = -1; break;
+      case 'dblsharp': change = 2; break;
+      case 'dblflat': change = -2; break;
+      case 'natural': change = 0; break;
+      default: break;
+    }
+    return change
   }
 
   private static durationToSeconds(duration: number, meterDen: number, tempo: number): number {
