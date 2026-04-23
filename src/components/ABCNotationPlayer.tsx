@@ -54,7 +54,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         }, abcParser.accidentals)
         const duration = abcElem.duration
         onNoteStart(noteNumber)
-        audioEngine.playNote(noteNumber, duration * 4)
+        audioEngine.playNote(noteNumber, duration)
         setTimeout(() => {
           onNoteEnd(noteNumber)
         }, duration * 1000);

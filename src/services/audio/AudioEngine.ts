@@ -12,10 +12,12 @@ export class AudioEngine {
   private activeOscillators: OscillatorNode[] = [];
   private activeGains: GainNode[] = [];
 
-  private baseReleaseTime: number = 0.1;
   private oscillatorType: OscillatorType = 'sine';
   private amplitudeMultiplier: number = 0.1;
-  private attackTime: number = 0.005;
+  private attackTime: number = 0.01;
+  private decayTime: number = 0.4;
+  private releaseTime: number = 0.3;
+  private sustainGain: number = 0.4;
   private silenceGain: number = 0.00001;
 
   init() {
@@ -40,14 +42,6 @@ export class AudioEngine {
     return this.currentTransferFunction;
   }
 
-  getBaseReleaseTime(): number {
-    return this.baseReleaseTime;
-  }
-
-  setBaseReleaseTime(value: number) {
-    this.baseReleaseTime = value;
-  }
-
   getOscillatorType(): OscillatorType {
     return this.oscillatorType;
   }
@@ -70,6 +64,30 @@ export class AudioEngine {
 
   setAttackTime(value: number) {
     this.attackTime = value;
+  }
+
+  getDelayTime(): number {
+    return this.decayTime;
+  }
+
+  setDelayTime(value: number) {
+    this.decayTime = value;
+  }
+
+  getReleaseTime(): number {
+    return this.releaseTime;
+  }
+
+  setReleaseTime(value: number) {
+    this.releaseTime = value;
+  }
+
+  getSustainGain(): number {
+    return this.sustainGain;
+  }
+
+  setSustainGain(value: number) {
+    this.sustainGain = value;
   }
 
   getSilenceGain(): number {
@@ -143,18 +161,19 @@ export class AudioEngine {
       const amplitude = timbreAmp * transferMag * this.amplitudeMultiplier;
 
       // 为高频谐波设置更快的衰减
-      const releaseTime = this.baseReleaseTime / Math.sqrt(n);
+      const releaseTime = this.releaseTime / Math.sqrt(n);
 
       // 相位延迟
       const phaseDeg = phases[n - 1] || 0;
       const phaseDelay = phaseDeg / (360 * freq);
 
       const startTime = Math.max(0, this.audioContext.currentTime + phaseDelay);
-      const stopTime = startTime + duration + releaseTime;
+      const stopTime = startTime + duration + this.decayTime + releaseTime;
       const targetGain = Math.max(amplitude, this.silenceGain);
 
       gain.gain.setValueAtTime(this.silenceGain, startTime);
       gain.gain.exponentialRampToValueAtTime(targetGain, startTime + this.attackTime);
+      gain.gain.exponentialRampToValueAtTime(this.sustainGain * targetGain, startTime + this.attackTime + this.decayTime);
       gain.gain.exponentialRampToValueAtTime(this.silenceGain, stopTime);
 
       osc.connect(gain);

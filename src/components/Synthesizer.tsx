@@ -6,15 +6,13 @@ interface SynthesizerSettingsProps {
 }
 
 const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }) => {
-  const [baseReleaseTime, setBaseReleaseTime] = useState(audioEngine.getBaseReleaseTime());
   const [oscillatorType, setOscillatorType] = useState(audioEngine.getOscillatorType());
   const [amplitudeMultiplier, setAmplitudeMultiplier] = useState(audioEngine.getAmplitudeMultiplier());
   const [attackTime, setAttackTime] = useState(audioEngine.getAttackTime());
+  const [decayTime, setDelayTime] = useState(audioEngine.getDelayTime());
+  const [releaseTime, setReleaseTime] = useState(audioEngine.getReleaseTime());
+  const [sustainGain, setSustainGain] = useState(audioEngine.getSustainGain());
   const [silenceGain, setSilenceGain] = useState(audioEngine.getSilenceGain());
-
-  useEffect(() => {
-    audioEngine.setBaseReleaseTime(baseReleaseTime);
-  }, [baseReleaseTime, audioEngine]);
 
   useEffect(() => {
     audioEngine.setOscillatorType(oscillatorType);
@@ -27,6 +25,18 @@ const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }
   useEffect(() => {
     audioEngine.setAttackTime(attackTime);
   }, [attackTime, audioEngine]);
+
+  useEffect(() => {
+    audioEngine.setDelayTime(decayTime);
+  }, [decayTime, audioEngine]);
+
+  useEffect(() => {
+    audioEngine.setReleaseTime(releaseTime);
+  }, [releaseTime, audioEngine]);
+
+  useEffect(() => {
+    audioEngine.setSustainGain(sustainGain);
+  }, [sustainGain, audioEngine]);
 
   useEffect(() => {
     audioEngine.setSilenceGain(silenceGain);
@@ -55,16 +65,16 @@ const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }
 
       <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
         <div className="mb-2 flex items-center justify-between text-sm">
-          <span>释放时间</span>
-          <span className="font-semibold">{baseReleaseTime.toFixed(2)} s</span>
+          <span>音量系数</span>
+          <span className="font-semibold">{amplitudeMultiplier.toFixed(2)}</span>
         </div>
         <input
           type="range"
-          min="0.01"
+          min="0"
           max="1"
           step="0.01"
-          value={baseReleaseTime}
-          onChange={(e) => setBaseReleaseTime(parseFloat(e.target.value))}
+          value={amplitudeMultiplier}
+          onChange={(e) => setAmplitudeMultiplier(parseFloat(e.target.value))}
           className="w-full accent-indigo-400"
         />
       </div>
@@ -87,32 +97,64 @@ const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }
 
       <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
         <div className="mb-2 flex items-center justify-between text-sm">
-          <span>静音增益</span>
-          <span className="font-semibold">{silenceGain.toExponential(2)}</span>
-        </div>
-        <input
-          type="range"
-          min="0.000001"
-          max="0.01"
-          step="0.000001"
-          value={silenceGain}
-          onChange={(e) => setSilenceGain(parseFloat(e.target.value))}
-          className="w-full accent-indigo-400"
-        />
-      </div>
-
-      <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
-        <div className="mb-2 flex items-center justify-between text-sm">
-          <span>音量系数</span>
-          <span className="font-semibold">{amplitudeMultiplier.toFixed(2)}</span>
+          <span>衰音时间</span>
+          <span className="font-semibold">{decayTime.toFixed(2)} s</span>
         </div>
         <input
           type="range"
           min="0.01"
           max="1"
           step="0.01"
-          value={amplitudeMultiplier}
-          onChange={(e) => setAmplitudeMultiplier(parseFloat(e.target.value))}
+          value={decayTime}
+          onChange={(e) => setDelayTime(parseFloat(e.target.value))}
+          className="w-full accent-indigo-400"
+        />
+      </div>
+
+      <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
+        <div className="mb-2 flex items-center justify-between text-sm">
+          <span>释音时间</span>
+          <span className="font-semibold">{releaseTime.toFixed(2)} s</span>
+        </div>
+        <input
+          type="range"
+          min="0.01"
+          max="1"
+          step="0.01"
+          value={releaseTime}
+          onChange={(e) => setReleaseTime(parseFloat(e.target.value))}
+          className="w-full accent-indigo-400"
+        />
+      </div>
+
+      <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
+        <div className="mb-2 flex items-center justify-between text-sm">
+          <span>稳音增益</span>
+          <span className="font-semibold">{sustainGain.toFixed(2)}</span>
+        </div>
+        <input
+          type="range"
+          min="0.1"
+          max="1"
+          step="0.01"
+          value={sustainGain}
+          onChange={(e) => setSustainGain(parseFloat(e.target.value))}
+          className="w-full accent-indigo-400"
+        />
+      </div>
+
+      <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
+        <div className="mb-2 flex items-center justify-between text-sm">
+          <span>静音增益</span>
+          <span className="font-semibold">{silenceGain.toExponential(2)}</span>
+        </div>
+        <input
+          type="range"
+          min="0.000001"
+          max="0.001"
+          step="0.000001"
+          value={silenceGain}
+          onChange={(e) => setSilenceGain(parseFloat(e.target.value))}
           className="w-full accent-indigo-400"
         />
       </div>

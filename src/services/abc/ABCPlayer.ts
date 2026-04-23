@@ -26,7 +26,7 @@ export class ABCPlayer {
       const startTimeoutId = window.setTimeout(() => {
         if (this.isPlaying) {
           this.onNoteStart?.(note.pitch);
-          this.audioEngine.playNote(note.pitch, note.duration * 4);
+          this.audioEngine.playNote(note.pitch, note.duration);
         }
       }, note.startTime * 1000);
       this.currentTimeoutIds.push(startTimeoutId);
