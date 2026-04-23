@@ -4,6 +4,7 @@ import Piano from './components/Piano';
 import TimbreSelector from './components/TimbreSelector';
 import TransferFunctionSelector from './components/TransferFunctionSelector';
 import ABCNotationPlayer from './components/ABCNotationPlayer';
+import SynthesizerSettings from './components/Synthesizer';
 import CollapsibleSection from './components/CollapsibleSection';
 
 function App() {
@@ -37,6 +38,11 @@ function App() {
           <h1 className="text-3xl font-bold">钢琴模拟器</h1>
           <p className="text-slate-500 dark:text-slate-400">点击琴键演奏音符</p>
         </div>
+        <CollapsibleSection title="声音合成器">
+          <SynthesizerSettings
+            audioEngine={audioEngine}
+          />
+        </CollapsibleSection>
         <CollapsibleSection title="音色调节器">
           <TimbreSelector
             audioEngine={audioEngine}

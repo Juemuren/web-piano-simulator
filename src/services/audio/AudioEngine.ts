@@ -12,6 +12,12 @@ export class AudioEngine {
   private activeOscillators: OscillatorNode[] = [];
   private activeGains: GainNode[] = [];
 
+  private baseReleaseTime: number = 0.1;
+  private oscillatorType: OscillatorType = 'sine';
+  private amplitudeMultiplier: number = 0.1;
+  private attackTime: number = 0.005;
+  private silenceGain: number = 0.00001;
+
   init() {
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
@@ -32,6 +38,46 @@ export class AudioEngine {
 
   getCurrentTransferFunction(): TransferFunction {
     return this.currentTransferFunction;
+  }
+
+  getBaseReleaseTime(): number {
+    return this.baseReleaseTime;
+  }
+
+  setBaseReleaseTime(value: number) {
+    this.baseReleaseTime = value;
+  }
+
+  getOscillatorType(): OscillatorType {
+    return this.oscillatorType;
+  }
+
+  setOscillatorType(type: OscillatorType) {
+    this.oscillatorType = type;
+  }
+
+  getAmplitudeMultiplier(): number {
+    return this.amplitudeMultiplier;
+  }
+
+  setAmplitudeMultiplier(value: number) {
+    this.amplitudeMultiplier = value;
+  }
+
+  getAttackTime(): number {
+    return this.attackTime;
+  }
+
+  setAttackTime(value: number) {
+    this.attackTime = value;
+  }
+
+  getSilenceGain(): number {
+    return this.silenceGain;
+  }
+
+  setSilenceGain(value: number) {
+    this.silenceGain = value;
   }
 
   private async ensureAudioContextRunning(): Promise<void> {
@@ -82,7 +128,6 @@ export class AudioEngine {
     const baseFreq = this.getFrequency(note);
     const harmonics = this.currentTimbre.amplitudes.length;
     const { magnitudes, phases } = this.computeTransferFunction(baseFreq);
-    const baseReleaseTime = 0.1;
 
     for (let n = 1; n <= harmonics; n++) {
       const osc = this.audioContext.createOscillator();
@@ -90,30 +135,27 @@ export class AudioEngine {
 
       const freq = baseFreq * n;
       osc.frequency.setValueAtTime(freq, this.audioContext.currentTime);
-      osc.type = 'sine';
+      osc.type = this.oscillatorType;
 
       // 使用当前音色的振幅和传递函数的振幅
       const timbreAmp = this.currentTimbre.amplitudes[n - 1] || 0;
       const transferMag = magnitudes[n - 1] || 0;
-      const amplitude = timbreAmp * transferMag * 0.1;
+      const amplitude = timbreAmp * transferMag * this.amplitudeMultiplier;
 
       // 为高频谐波设置更快的衰减
-      const releaseTime = baseReleaseTime / Math.sqrt(n);
+      const releaseTime = this.baseReleaseTime / Math.sqrt(n);
 
       // 相位延迟
       const phaseDeg = phases[n - 1] || 0;
       const phaseDelay = phaseDeg / (360 * freq);
+
       const startTime = Math.max(0, this.audioContext.currentTime + phaseDelay);
       const stopTime = startTime + duration + releaseTime;
+      const targetGain = Math.max(amplitude, this.silenceGain);
 
-      const attackTime = 0.005;
-      const initialGain = 0.00001;
-      const targetGain = Math.max(amplitude, initialGain);
-
-      gain.gain.setValueAtTime(initialGain, this.audioContext.currentTime);
-      gain.gain.setValueAtTime(initialGain, startTime);
-      gain.gain.exponentialRampToValueAtTime(targetGain, startTime + attackTime);
-      gain.gain.exponentialRampToValueAtTime(initialGain, stopTime);
+      gain.gain.setValueAtTime(this.silenceGain, startTime);
+      gain.gain.exponentialRampToValueAtTime(targetGain, startTime + this.attackTime);
+      gain.gain.exponentialRampToValueAtTime(this.silenceGain, stopTime);
 
       osc.connect(gain);
       gain.connect(this.audioContext.destination);
