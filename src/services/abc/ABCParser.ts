@@ -61,8 +61,11 @@ export class ABCParser {
   }
 
   private static pitchToMidi(pitch: ABCPitch): number {
-    const correctVerticalPos = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 25, 26, 28, 30, 32, 33, 35, 37, 39, 41, 43, 45, 47, 48];
-    const correctedPos = correctVerticalPos[pitch.verticalPos || 0] || 0;
+    const octave_offset = [0, 2, 4, 5, 7, 9, 11];
+    const currentNotes = pitch?.verticalPos ?? 60
+    const octave = Math.floor(currentNotes / 7);
+    const idx = ((currentNotes % 7) + 7) % 7;
+    const correctedPos = octave * 12 + octave_offset[idx];
 
     let accValue = 0;
     if (typeof pitch.accidental === 'string') {
