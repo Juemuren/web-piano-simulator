@@ -18,8 +18,6 @@ export class ABCParser {
       const tempo = tune.metaText?.tempo?.bpm ?? 120;
       const staff = tune.lines?.[0]?.staff?.[0];
       const key = staff?.key?.root ?? 'C';
-      const meterValue = staff?.meter?.value?.[0];
-      const meter = meterValue && meterValue.num && meterValue.den ? `${meterValue.num}/${meterValue.den}` : '4/4';
 
       const notes: ABCNote[] = [];
       let currentTime = 0;
@@ -31,7 +29,7 @@ export class ABCParser {
         for (const element of voice) {
           if (element.el_type === 'note' && element.pitches && element.pitches.length > 0) {
             const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
-            const meterDen = meterValue?.den ?? 8
+            const meterDen = tune.getMeterFraction()?.den ?? 8
             const duration = this.durationToSeconds(rawDuration, meterDen, tempo);
             element.pitches.forEach(pitch => {
               const midiNote = this.pitchToMidi(pitch);
@@ -49,7 +47,6 @@ export class ABCParser {
       return {
         title,
         key,
-        meter,
         notes,
         tempo
       };
@@ -86,9 +83,10 @@ export class ABCParser {
   }
 
   private static durationToSeconds(duration: number, meterDen: number, tempo: number): number {
-    const secondsPerWholeNote = 60 / tempo;
-    // 音符时长 = 音符初始时长 * 拍号分母 * 单位音符时长
-    const result = duration * meterDen * secondsPerWholeNote;
+    const secondsPerBeats = 60 / tempo;
+    const beatsForNotes = duration * meterDen
+    // 音符时长 = 音符节拍数 * 每节拍秒数
+    const result = beatsForNotes * secondsPerBeats;
     return Math.max(result, 0.1);
   }
 }

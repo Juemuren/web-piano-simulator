@@ -25,7 +25,6 @@ export interface ABCNote {
 export interface ABCScore {
   title?: string;
   key: string;
-  meter: string;
   notes: ABCNote[];
   tempo?: number;
 }
