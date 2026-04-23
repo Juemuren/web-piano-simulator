@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
+import { type AbcElem, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
+import { pitchToMidi } from '../services/abc/ABCHelper';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { type ABCPreset, presets, formatHeaderToABC } from '../services/abc/ABCPresets';
 
@@ -43,9 +44,26 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     notationRef.current.innerHTML = '';
 
     if (parsedNotes) {
+      const clickListener = async (abcElem: AbcElem) => {
+        const abcPitch = abcElem.pitches?.[0]
+        const noteNumber = pitchToMidi({
+          name: abcPitch?.name,
+          pitch: abcPitch?.pitch,
+          verticalPos: abcPitch?.verticalPos,
+          accidental: abcPitch?.accidental
+        }, abcParser.accidentals)
+        const duration = abcElem.duration
+        onNoteStart(noteNumber)
+        audioEngine.playNote(noteNumber, duration * 4)
+        setTimeout(() => {
+          onNoteEnd(noteNumber)
+        }, duration * 1000);
+      };
+
       const visualObjs = renderAbc(notationRef.current, abcInputMemo, {
         responsive: 'resize',
-        add_classes: true
+        clickListener: clickListener,
+        add_classes: true,
       });
       visualObjRef.current = visualObjs[0];
 
@@ -67,7 +85,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         }
       });
     }
-  }, [parsedNotes, abcInputMemo]);
+  }, [parsedNotes, abcInputMemo, abcParser, audioEngine, onNoteStart, onNoteEnd]);
 
   const handlePlay = () => {
     if (parsedNotes && timingCallbacksRef.current) {
