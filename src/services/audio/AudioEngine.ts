@@ -13,7 +13,7 @@ export class AudioEngine {
   private activeGains: GainNode[] = [];
 
   private oscillatorType: OscillatorType = 'sine';
-  private amplitudeMultiplier: number = 0.1;
+  private volume: number = 0.2;
   private attackTime: number = 0.01;
   private decayTime: number = 0.4;
   private releaseTime: number = 0.3;
@@ -50,12 +50,12 @@ export class AudioEngine {
     this.oscillatorType = type;
   }
 
-  getAmplitudeMultiplier(): number {
-    return this.amplitudeMultiplier;
+  getVolume(): number {
+    return this.volume;
   }
 
-  setAmplitudeMultiplier(value: number) {
-    this.amplitudeMultiplier = value;
+  setVolume(value: number) {
+    this.volume = value;
   }
 
   getAttackTime(): number {
@@ -113,7 +113,6 @@ export class AudioEngine {
     }
   }
 
-  // 计算传递函数对每个谐波的影响
   private computeTransferFunction(baseFreq: number): { magnitudes: number[], phases: number[] } {
       const transferFunction = this.currentTransferFunction
       if (transferFunction.type === 'custom') {
@@ -133,12 +132,10 @@ export class AudioEngine {
       );
   }
 
-  // 计算频率
   getFrequency(note: number): number {
     return 440 * Math.pow(2, (note - 69) / 12);
   }
 
-  // 播放音符
   async playNote(note: number, duration: number = 1) {
     await this.ensureAudioContextRunning();
     if (!this.audioContext) return;
@@ -155,25 +152,26 @@ export class AudioEngine {
       osc.frequency.setValueAtTime(freq, this.audioContext.currentTime);
       osc.type = this.oscillatorType;
 
-      // 使用当前音色的振幅和传递函数的振幅
+      // 处理振幅
       const timbreAmp = this.currentTimbre.amplitudes[n - 1] || 0;
       const transferMag = magnitudes[n - 1] || 0;
-      const amplitude = timbreAmp * transferMag * this.amplitudeMultiplier;
+      const amplitude = timbreAmp * transferMag * this.volume;
 
-      // 为高频谐波设置更快的衰减
-      const releaseTime = this.releaseTime / Math.sqrt(n);
-
-      // 相位延迟
+      // 处理相位
       const phaseDeg = phases[n - 1] || 0;
       const phaseDelay = phaseDeg / (360 * freq);
 
+      // 高频谐波快速衰减
+      const releaseTime = this.releaseTime / Math.sqrt(n);
+      const decayTime = this.decayTime / Math.sqrt(n);
+
       const startTime = Math.max(0, this.audioContext.currentTime + phaseDelay);
-      const stopTime = startTime + duration + this.decayTime + releaseTime;
+      const stopTime = startTime + duration + decayTime + releaseTime;
       const targetGain = Math.max(amplitude, this.silenceGain);
 
       gain.gain.setValueAtTime(this.silenceGain, startTime);
       gain.gain.exponentialRampToValueAtTime(targetGain, startTime + this.attackTime);
-      gain.gain.exponentialRampToValueAtTime(this.sustainGain * targetGain, startTime + this.attackTime + this.decayTime);
+      gain.gain.exponentialRampToValueAtTime(this.sustainGain * targetGain, startTime + this.attackTime + decayTime);
       gain.gain.exponentialRampToValueAtTime(this.silenceGain, stopTime);
 
       osc.connect(gain);
@@ -189,7 +187,6 @@ export class AudioEngine {
         gain.disconnect();
       };
 
-      // 启动振荡器
       osc.start(startTime);
       osc.stop(stopTime);
     }

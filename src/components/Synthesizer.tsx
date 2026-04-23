@@ -7,7 +7,7 @@ interface SynthesizerSettingsProps {
 
 const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }) => {
   const [oscillatorType, setOscillatorType] = useState(audioEngine.getOscillatorType());
-  const [amplitudeMultiplier, setAmplitudeMultiplier] = useState(audioEngine.getAmplitudeMultiplier());
+  const [volume, setVolume] = useState(audioEngine.getVolume());
   const [attackTime, setAttackTime] = useState(audioEngine.getAttackTime());
   const [decayTime, setDelayTime] = useState(audioEngine.getDelayTime());
   const [releaseTime, setReleaseTime] = useState(audioEngine.getReleaseTime());
@@ -19,8 +19,8 @@ const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }
   }, [oscillatorType, audioEngine]);
 
   useEffect(() => {
-    audioEngine.setAmplitudeMultiplier(amplitudeMultiplier);
-  }, [amplitudeMultiplier, audioEngine]);
+    audioEngine.setVolume(volume);
+  }, [volume, audioEngine]);
 
   useEffect(() => {
     audioEngine.setAttackTime(attackTime);
@@ -66,15 +66,15 @@ const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }
       <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
         <div className="mb-2 flex items-center justify-between text-sm">
           <span>音量系数</span>
-          <span className="font-semibold">{amplitudeMultiplier.toFixed(2)}</span>
+          <span className="font-semibold">{volume.toFixed(2)}</span>
         </div>
         <input
           type="range"
           min="0"
           max="1"
           step="0.01"
-          value={amplitudeMultiplier}
-          onChange={(e) => setAmplitudeMultiplier(parseFloat(e.target.value))}
+          value={volume}
+          onChange={(e) => setVolume(parseFloat(e.target.value))}
           className="w-full accent-indigo-400"
         />
       </div>

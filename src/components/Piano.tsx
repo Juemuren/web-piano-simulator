@@ -22,7 +22,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
   }, [audioEngine]);
 
   const playNote = (note: number) => {
-    audioEngine.playNote(note, 2); // 播放 2 秒
+    audioEngine.playNote(note, 1);
   };
 
   const handleKeyDown = (e: React.MouseEvent | React.TouchEvent, note: number) => {
