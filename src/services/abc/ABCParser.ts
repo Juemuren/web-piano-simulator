@@ -30,18 +30,17 @@ export class ABCParser {
       if (voice) {
         for (const element of voice) {
           if (element.el_type === 'note' && element.pitches && element.pitches.length > 0) {
-            const pitch = element.pitches[0];
-            const midiNote = this.pitchToMidi(pitch);
             const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
             const meterDen = meterValue?.den ?? 8
             const duration = this.durationToSeconds(rawDuration, meterDen, tempo);
-
-            notes.push({
-              pitch: midiNote,
-              duration,
-              startTime: currentTime
+            element.pitches.forEach(pitch => {
+              const midiNote = this.pitchToMidi(pitch);
+              notes.push({
+                pitch: midiNote,
+                duration,
+                startTime: currentTime
+              });
             });
-
             currentTime += duration;
           }
         }
