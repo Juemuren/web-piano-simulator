@@ -30,8 +30,8 @@ export function generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lamb
   return { type, amplitudes: normalized };
 }
 
-export function computeTransferFunctionForHarmonics(
-  type: Exclude<TransferFunctionPreset, 'custom'>,
+export function computeTransferFunction(
+  type: TransferFunctionPreset,
   tau: number,
   alpha: number,
   fc: number,
@@ -97,12 +97,12 @@ export function computeTransferFunctionForHarmonics(
 }
 
 export function generatePresetTransferFunction(
-  type: Exclude<TransferFunctionPreset, 'custom'>,
+  type: TransferFunctionPreset,
   tau: number = 0,
   alpha: number = 0,
   fc: number = 2000,
 ): TransferFunction {
-  const { magnitudes, phases } = computeTransferFunctionForHarmonics(type, tau, alpha, fc, 440);
+  const { magnitudes, phases } = computeTransferFunction(type, tau, alpha, fc, 440);
   return {
     type,
     tau,

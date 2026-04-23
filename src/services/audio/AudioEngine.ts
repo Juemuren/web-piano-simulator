@@ -1,6 +1,6 @@
 import type { TransferFunction, Timbre } from '../../types';
 import {
-  computeTransferFunctionForHarmonics,
+  computeTransferFunction,
   generatePresetTimbre,
   generatePresetTransferFunction,
 } from './AudioPresets';
@@ -113,25 +113,6 @@ export class AudioEngine {
     }
   }
 
-  private computeTransferFunction(baseFreq: number): { magnitudes: number[], phases: number[] } {
-      const transferFunction = this.currentTransferFunction
-      if (transferFunction.type === 'custom') {
-        return {
-          magnitudes: transferFunction.magnitudes,
-          phases: transferFunction.phases,
-        };
-      }
-    
-      return computeTransferFunctionForHarmonics(
-        transferFunction.type,
-        transferFunction.tau,
-        transferFunction.alpha,
-        transferFunction.fc,
-        baseFreq,
-        this.currentTimbre.amplitudes.length,
-      );
-  }
-
   getFrequency(note: number): number {
     return 440 * Math.pow(2, (note - 69) / 12);
   }
@@ -142,7 +123,15 @@ export class AudioEngine {
 
     const baseFreq = this.getFrequency(note);
     const harmonics = this.currentTimbre.amplitudes.length;
-    const { magnitudes, phases } = this.computeTransferFunction(baseFreq);
+    const transferFunction = this.currentTransferFunction
+    const { magnitudes, phases } = computeTransferFunction(
+      transferFunction.type,
+      transferFunction.tau,
+      transferFunction.alpha,
+      transferFunction.fc,
+      baseFreq,
+      this.currentTimbre.amplitudes.length,
+    );;
 
     for (let n = 1; n <= harmonics; n++) {
       const osc = this.audioContext.createOscillator();

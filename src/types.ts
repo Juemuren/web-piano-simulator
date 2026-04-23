@@ -5,7 +5,7 @@ export interface Timbre {
   amplitudes: number[];
 }
 
-export type TransferFunctionPreset = 'delay' | 'single_echo' | 'multi_echo' | 'lowpass' | 'highpass' | 'allpass' | 'custom';
+export type TransferFunctionPreset = 'delay' | 'single_echo' | 'multi_echo' | 'lowpass' | 'highpass' | 'allpass';
 
 export interface TransferFunction {
   type: TransferFunctionPreset;

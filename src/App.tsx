@@ -38,7 +38,7 @@ function App() {
           <h1 className="text-3xl font-bold">钢琴模拟器</h1>
           <p className="text-slate-500 dark:text-slate-400">点击琴键演奏音符</p>
         </div>
-        <CollapsibleSection title="声音合成器">
+        <CollapsibleSection title="谐波合成器">
           <SynthesizerSettings
             audioEngine={audioEngine}
           />
@@ -48,7 +48,7 @@ function App() {
             audioEngine={audioEngine}
           />
         </CollapsibleSection>
-        <CollapsibleSection title="传递函数修改器">
+        <CollapsibleSection title="传函修改器">
           <TransferFunctionSelector
             audioEngine={audioEngine}
           />
