@@ -32,7 +32,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
   const abcInputMemo = useMemo(() => formatHeaderToABC(header) + body, [header, body]);
 
-  const parsedScore = useMemo(() => {
+  const parsedNotes = useMemo(() => {
     return ABCParser.parse(abcInputMemo);
   }, [abcInputMemo]);
 
@@ -41,7 +41,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
     notationRef.current.innerHTML = '';
 
-    if (parsedScore) {
+    if (parsedNotes) {
       const visualObjs = renderAbc(notationRef.current, abcInputMemo, {
         responsive: 'resize',
         add_classes: true
@@ -66,11 +66,11 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         }
       });
     }
-  }, [parsedScore, abcInputMemo]);
+  }, [parsedNotes, abcInputMemo]);
 
   const handlePlay = () => {
-    if (parsedScore && timingCallbacksRef.current) {
-      abcPlayer.play(parsedScore);
+    if (parsedNotes && timingCallbacksRef.current) {
+      abcPlayer.play(parsedNotes);
       timingCallbacksRef.current.start();
       setIsPlaying(true);
     }
@@ -160,7 +160,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         />
 
         <div className="flex justify-center">
-          {parsedScore && (
+          {parsedNotes && (
             <button
               onClick={isPlaying ? handleStop : handlePlay}
               className={`px-4 py-2 text-white rounded-2xl transition-colors ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
@@ -170,7 +170,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           )}
         </div>
 
-        {parsedScore && (
+        {parsedNotes && (
           <div
             ref={notationRef}
             className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"

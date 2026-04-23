@@ -1,5 +1,5 @@
 import { AudioEngine } from '../audio/AudioEngine';
-import type { ABCScore } from '../../types';
+import type { ABCNote } from '../../types';
 
 export class ABCPlayer {
   private audioEngine: AudioEngine;
@@ -14,7 +14,7 @@ export class ABCPlayer {
     this.onNoteEnd = onNoteEnd;
   }
 
-  play(score: ABCScore): void {
+  play(notes: ABCNote[]): void {
     if (this.isPlaying) {
       this.stop();
     }
@@ -22,7 +22,7 @@ export class ABCPlayer {
     this.isPlaying = true;
     this.currentTimeoutIds = [];
 
-    for (const note of score.notes) {
+    for (const note of notes) {
       const startTimeoutId = window.setTimeout(() => {
         if (this.isPlaying) {
           this.onNoteStart?.(note.pitch);
@@ -39,7 +39,7 @@ export class ABCPlayer {
       this.currentTimeoutIds.push(endTimeoutId);
     }
 
-    const totalDuration = Math.max(...score.notes.map(n => n.startTime + n.duration));
+    const totalDuration = Math.max(...notes.map(n => n.startTime + n.duration));
     const stopTimeoutId = window.setTimeout(() => {
       this.isPlaying = false;
     }, totalDuration * 1000);

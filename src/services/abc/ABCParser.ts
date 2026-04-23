@@ -1,5 +1,5 @@
 import { type Accidental, type AccidentalName, parseOnly } from 'abcjs';
-import type { ABCNote, ABCScore } from '../../types';
+import type { ABCNote } from '../../types';
 
 interface ABCPitch {
   pitch?: number;
@@ -9,12 +9,11 @@ interface ABCPitch {
 }
 
 export class ABCParser {
-  static parse(abcString: string): ABCScore | null {
+  static parse(abcString: string): ABCNote[] | null {
     try {
       const tunes = parseOnly(abcString);
       const tune = tunes?.[0];
       if (!tune) return null;
-      const title = tune.metaText?.title ?? '';
       const tempo = tune.metaText?.tempo?.bpm ?? 120;
       const meterDen = tune.getMeterFraction()?.den ?? 8
       const accidentals = tune.getKeySignature()?.accidentals ?? []
@@ -43,11 +42,7 @@ export class ABCParser {
         }
       }
 
-      return {
-        title,
-        notes,
-        tempo
-      };
+      return notes
     } catch (error) {
       console.error('Error parsing ABC notation:', error);
       return null;

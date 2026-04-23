@@ -21,9 +21,3 @@ export interface ABCNote {
   duration: number;
   startTime: number;
 }
-
-export interface ABCScore {
-  title?: string;
-  notes: ABCNote[];
-  tempo?: number;
-}
