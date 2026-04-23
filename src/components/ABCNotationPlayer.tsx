@@ -67,13 +67,20 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
       });
       visualObjRef.current = visualObjs[0];
 
+      const removeHighlight = () => {
+        document.querySelectorAll('.abcjs-highlight')
+          .forEach(el => el.classList.remove('abcjs-highlight'))
+      }
+
       timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
         eventCallback: (ev) => {
-          if (!ev) return;
+          if (!ev) {
+            removeHighlight()
+            setIsPlaying(false)
+            return
+          };
 
-          const lastSelection = document.querySelectorAll('.abcjs-highlight');
-          lastSelection.forEach(el => el.classList.remove('abcjs-highlight'));
-
+          removeHighlight()
           if (ev.elements) {
             ev.elements.forEach((noteGroup: Element[]) => {
               noteGroup.forEach((element: Element) => {
@@ -89,8 +96,20 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
   const handlePlay = () => {
     if (parsedNotes && timingCallbacksRef.current) {
-      abcPlayer.play(parsedNotes);
-      timingCallbacksRef.current.start();
+      const selectedElement = document.querySelector('.abcjs-note_selected');
+      if (selectedElement) {
+        const selectedIndex = parseInt(selectedElement.getAttribute('data-index') || '0');
+        const notesToPlay = structuredClone(parsedNotes.slice(selectedIndex));
+        if (notesToPlay.length > 0) {
+          const startTimeOffset = notesToPlay[0].startTime;
+          notesToPlay.forEach(note => note.startTime -= startTimeOffset);
+          abcPlayer.play(notesToPlay);
+          timingCallbacksRef.current.start(startTimeOffset, "seconds");
+        }
+      } else {
+        abcPlayer.play(parsedNotes)
+        timingCallbacksRef.current.start()
+      }
       setIsPlaying(true);
     }
   };
@@ -107,12 +126,12 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     lastSelection.forEach(el => el.classList.remove('abcjs-highlight'));
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsPlaying(abcPlayer.isCurrentlyPlaying());
-    }, 100);
-    return () => clearInterval(interval);
-  }, [abcPlayer]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setIsPlaying(abcPlayer.isCurrentlyPlaying());
+  //   }, 100);
+  //   return () => clearInterval(interval);
+  // }, [abcPlayer]);
 
   useEffect(() => {
     return () => {
