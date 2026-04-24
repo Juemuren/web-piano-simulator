@@ -8,7 +8,7 @@ export interface ABCPitch {
   accidental?: AccidentalName;
 }
 
-export function pitchToMidi(pitch: ABCPitch, accidentals: Accidental[]):number {
+export function pitchToMidi(pitch: ABCPitch, accidentals: Accidental[]): number {
   const defaultNotes = 60 // C4
   const octave_offset = [0, 2, 4, 5, 7, 9, 11];
   const currentNotes = pitch?.verticalPos ?? defaultNotes
@@ -62,19 +62,20 @@ export function playSingleAbcElem(
   onNoteEnd: (pitch: number) => void
 ) {
   if (abcElem.pitches && abcElem.pitches.length > 0) {
-    const abcPitch = abcElem.pitches[0];
-    const noteNumber = pitchToMidi({
-      name: abcPitch.name,
-      pitch: abcPitch.pitch,
-      verticalPos: abcPitch.verticalPos,
-      accidental: abcPitch.accidental
-    }, accidentals);
-    const duration = abcElem.duration;
-    onNoteStart(noteNumber);
-    audioEngine.playNote(noteNumber, duration);
-    setTimeout(() => {
-      onNoteEnd(noteNumber);
-    }, duration * 1000);
+    abcElem.pitches.forEach(abcPitch => {
+      const noteNumber = pitchToMidi({
+        name: abcPitch.name,
+        pitch: abcPitch.pitch,
+        verticalPos: abcPitch.verticalPos,
+        accidental: abcPitch.accidental
+      }, accidentals);
+      const duration = abcElem.duration;
+      onNoteStart(noteNumber);
+      audioEngine.playNote(noteNumber, duration);
+      setTimeout(() => {
+        onNoteEnd(noteNumber);
+      }, duration * 1000);
+    });
   } else if (abcElem.rest) {
     return
   }
