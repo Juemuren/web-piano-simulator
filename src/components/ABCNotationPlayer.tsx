@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { type AbcElem, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
+import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
 import { pitchToMidi } from '../services/abc/ABCHelper';
@@ -45,30 +45,27 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
   useEffect(() => {
     if (!notationRef.current) return;
-
     notationRef.current.innerHTML = '';
 
     if (parsedNotes) {
-      const clickListener = async (abcElem: AbcElem) => {
-        if (abcElem.pitches && abcElem.pitches.length > 0) {
-          abcElem.pitches.forEach(abcPitch => {
-            const midiPitch = pitchToMidi({
-              name: abcPitch.name,
-              pitch: abcPitch.pitch,
-              accidental: abcPitch.accidental
-            }, abcParser.accidentals);
-            abcPlayer.play({
-              pitch: midiPitch,
-              duration: abcElem.duration
-            })
-          })
-        }
-      };
-
       const visualObjs = renderAbc(notationRef.current, abcInputMemo, {
         responsive: 'resize',
-        clickListener: clickListener,
         add_classes: true,
+        clickListener: (abcElem) => {
+          if (abcElem.pitches && abcElem.pitches.length > 0) {
+            abcElem.pitches.forEach(abcPitch => {
+              const midiPitch = pitchToMidi({
+                name: abcPitch.name,
+                pitch: abcPitch.pitch,
+                accidental: abcPitch.accidental
+              }, abcParser.accidentals);
+              abcPlayer.play({
+                pitch: midiPitch,
+                duration: abcElem.duration
+              })
+            })
+          }
+        },
       });
       visualObjRef.current = visualObjs[0];
 
@@ -79,7 +76,6 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
             setIsPlaying(false)
             return
           };
-
           removeHighlight()
           if (ev.elements) {
             ev.elements.forEach((noteGroup: Element[]) => {

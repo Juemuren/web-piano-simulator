@@ -20,8 +20,8 @@ export interface ABCNote {
   pitch: number;
   duration: number;
   isRest?: boolean;
-  hasStartTie?: boolean;
-  hasEndTie?: boolean;
+  isStartTie?: boolean;
+  isEndTie?: boolean;
   index?: number;
   beats?: number;
 }

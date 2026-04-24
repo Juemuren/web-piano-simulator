@@ -13,13 +13,11 @@ export class ABCPlayer {
   }
 
   play(note: ABCNote) {
-    if (note.isRest) {
+    if (note.isRest || note.isEndTie) {
       return;
     }
-    if (!note.hasEndTie) {
-      this.onNoteStart?.(note.pitch);
-      this.audioEngine.playNote(note.pitch, note.duration);
-    }
+    this.onNoteStart?.(note.pitch);
+    this.audioEngine.playNote(note.pitch, note.duration);
     setTimeout(() => {
       this.onNoteEnd?.(note.pitch);
     }, (note.duration) * 1000);
