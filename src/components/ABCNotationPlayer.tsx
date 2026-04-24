@@ -81,10 +81,8 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
             ev.elements.forEach((noteGroup: Element[]) => {
               noteGroup.forEach((element: Element) => {
                 const index = parseInt(element.getAttribute('data-index') || '0');
-                const note = parsedNotes.find(note => note.index === index)
-                if (note) {
-                  abcPlayer.play(note)
-                }
+                const notes = parsedNotes.filter(note => note.index === index)
+                notes.forEach(note =>abcPlayer.play(note))
                 element.classList.add('abcjs-highlight');
               });
             });
