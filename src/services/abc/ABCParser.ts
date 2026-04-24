@@ -21,6 +21,7 @@ export class ABCParser {
       const allNotes: ABCNote[] = [];
       const staffNotes = new Map<number, ABCNote[]>();
       let globalTime = 0;
+      let index = 0;
 
       tune.lines?.forEach(line => {
         let lineMaxTime = 0;
@@ -52,27 +53,31 @@ export class ABCParser {
                           duration: 0,
                           startTime: globalTime + voiceTime,
                           hasStartTie: pitch.startTie !== undefined,
-                          hasEndTie: true
+                          hasEndTie: true,
+                          index
                         })
-                        return;
                       }
+                    } else if (element.rest) {
+                      currentStaffNotes.push({
+                        pitch: 0,
+                        duration,
+                        startTime: globalTime + voiceTime,
+                        isRest: true,
+                        index
+                      });
+                    } else {
+                      currentStaffNotes.push({
+                        pitch: midiNote,
+                        duration,
+                        startTime: globalTime + voiceTime,
+                        isRest: false,
+                        hasStartTie: pitch.startTie !== undefined,
+                        index
+                      });
                     }
-                    currentStaffNotes.push({
-                      pitch: midiNote,
-                      duration,
-                      startTime: globalTime + voiceTime,
-                      isRest: false,
-                      hasStartTie: pitch.startTie !== undefined
-                    });
-                  });
-                } else if (element.rest) {
-                  currentStaffNotes.push({
-                    pitch: 0,
-                    duration,
-                    startTime: globalTime + voiceTime,
-                    isRest: true
                   });
                 }
+                index++;
                 voiceTime += duration;
                 lineMaxTime = Math.max(lineMaxTime, voiceTime);
               }

@@ -97,10 +97,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
       const selectedElement = document.querySelector('.abcjs-note_selected');
       if (selectedElement) {
         const selectedIndex = parseInt(selectedElement.getAttribute('data-index') || '0');
-        const uniqueStartTimes = Array.from(
-          new Set(parsedNotes.map(note => note.startTime))
-        ).sort((a, b) => a - b);
-        const selectedStartTime = uniqueStartTimes[selectedIndex];
+        const selectedStartTime = parsedNotes.find(note => note.index === selectedIndex)?.startTime || 0
         const notesToPlay = structuredClone(parsedNotes.filter(note => note.startTime >= selectedStartTime));
         if (notesToPlay.length > 0) {
           notesToPlay.forEach(note => note.startTime -= selectedStartTime);
@@ -118,13 +115,6 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const handleStop = () => {
     stopPlayback();
   };
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setIsPlaying(abcPlayer.isCurrentlyPlaying());
-  //   }, 100);
-  //   return () => clearInterval(interval);
-  // }, [abcPlayer]);
 
   useEffect(() => {
     return () => {

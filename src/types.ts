@@ -23,4 +23,5 @@ export interface ABCNote {
   isRest?: boolean;
   hasStartTie?: boolean;
   hasEndTie?: boolean;
+  index: number;
 }
