@@ -97,16 +97,19 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
       const selectedElement = document.querySelector('.abcjs-note_selected');
       if (selectedElement) {
         const selectedIndex = parseInt(selectedElement.getAttribute('data-index') || '0');
-        const notesToPlay = structuredClone(parsedNotes.slice(selectedIndex));
+        const uniqueStartTimes = Array.from(
+          new Set(parsedNotes.map(note => note.startTime))
+        ).sort((a, b) => a - b);
+        const selectedStartTime = uniqueStartTimes[selectedIndex];
+        const notesToPlay = structuredClone(parsedNotes.filter(note => note.startTime >= selectedStartTime));
         if (notesToPlay.length > 0) {
-          const startTimeOffset = notesToPlay[0].startTime;
-          notesToPlay.forEach(note => note.startTime -= startTimeOffset);
+          notesToPlay.forEach(note => note.startTime -= selectedStartTime);
           abcPlayer.play(notesToPlay);
-          timingCallbacksRef.current.start(startTimeOffset, "seconds");
+          timingCallbacksRef.current.start(selectedStartTime, 'seconds');
         }
       } else {
-        abcPlayer.play(parsedNotes)
-        timingCallbacksRef.current.start()
+        abcPlayer.play(parsedNotes);
+        timingCallbacksRef.current.start();
       }
       setIsPlaying(true);
     }
