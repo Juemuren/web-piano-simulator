@@ -1,10 +1,8 @@
-import { type Accidental, type AccidentalName, type AbcElem } from 'abcjs';
-import { AudioEngine } from '../audio/AudioEngine';
+import { type Accidental, type AccidentalName } from 'abcjs';
 
 export interface ABCPitch {
   pitch?: number;
   name?: string;
-  verticalPos?: number;
   accidental?: AccidentalName;
 }
 
@@ -44,39 +42,4 @@ export function semitoneShift(acc: AccidentalName): number {
     default: break;
   }
   return change
-}
-
-export function durationToSeconds(duration: number, meterDen: number, tempo: number): number {
-  const secondsPerBeats = 60 / tempo;
-  const beatsForNotes = duration * meterDen
-  // 音符时长 = 音符节拍数 * 每节拍秒数
-  const result = beatsForNotes * secondsPerBeats;
-  return Math.max(result, 0.1);
-}
-
-export function playSingleAbcElem(
-  abcElem: AbcElem,
-  accidentals: Accidental[],
-  audioEngine: AudioEngine,
-  onNoteStart: (pitch: number) => void,
-  onNoteEnd: (pitch: number) => void
-) {
-  if (abcElem.pitches && abcElem.pitches.length > 0) {
-    abcElem.pitches.forEach(abcPitch => {
-      const noteNumber = pitchToMidi({
-        name: abcPitch.name,
-        pitch: abcPitch.pitch,
-        verticalPos: abcPitch.verticalPos,
-        accidental: abcPitch.accidental
-      }, accidentals);
-      const duration = abcElem.duration;
-      onNoteStart(noteNumber);
-      audioEngine.playNote(noteNumber, duration);
-      setTimeout(() => {
-        onNoteEnd(noteNumber);
-      }, duration * 1000);
-    });
-  } else if (abcElem.rest) {
-    return
-  }
 }

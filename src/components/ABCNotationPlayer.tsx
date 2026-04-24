@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { type AbcElem, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
-import { playSingleAbcElem } from '../services/abc/ABCHelper';
+import { pitchToMidi } from '../services/abc/ABCHelper';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { type ABCPreset, presets, formatHeaderToABC } from '../services/abc/ABCPresets';
 
@@ -50,7 +50,19 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
     if (parsedNotes) {
       const clickListener = async (abcElem: AbcElem) => {
-        playSingleAbcElem(abcElem, abcParser.accidentals, audioEngine, onNoteStart, onNoteEnd);
+        if (abcElem.pitches && abcElem.pitches.length > 0) {
+          abcElem.pitches.forEach(abcPitch => {
+            const midiPitch = pitchToMidi({
+              name: abcPitch.name,
+              pitch: abcPitch.pitch,
+              accidental: abcPitch.accidental
+            }, abcParser.accidentals);
+            abcPlayer.play({
+              pitch: midiPitch,
+              duration: abcElem.duration
+            })
+          })
+        }
       };
 
       const visualObjs = renderAbc(notationRef.current, abcInputMemo, {
@@ -72,6 +84,11 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           if (ev.elements) {
             ev.elements.forEach((noteGroup: Element[]) => {
               noteGroup.forEach((element: Element) => {
+                const index = parseInt(element.getAttribute('data-index') || '0');
+                const note = parsedNotes.find(note => note.index === index)
+                if (note) {
+                  abcPlayer.play(note)
+                }
                 element.classList.add('abcjs-highlight');
               });
             });
@@ -80,32 +97,25 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         }
       });
     }
-  }, [parsedNotes, abcInputMemo, abcParser, audioEngine, onNoteStart, onNoteEnd]);
+  }, [parsedNotes, abcInputMemo, abcParser, audioEngine, onNoteStart, onNoteEnd, abcPlayer]);
 
   const stopPlayback = useCallback(() => {
-    abcPlayer.stop();
     if (timingCallbacksRef.current) {
       timingCallbacksRef.current.stop();
     }
     setIsPlaying(false);
     onStop();
     removeHighlight()
-  }, [abcPlayer, timingCallbacksRef, onStop]);
+  }, [timingCallbacksRef, onStop]);
 
   const handlePlay = () => {
     if (parsedNotes && timingCallbacksRef.current) {
       const selectedElement = document.querySelector('.abcjs-note_selected');
       if (selectedElement) {
-        const selectedIndex = parseInt(selectedElement.getAttribute('data-index') || '0');
-        const selectedStartTime = parsedNotes.find(note => note.index === selectedIndex)?.startTime || 0
-        const notesToPlay = structuredClone(parsedNotes.filter(note => note.startTime >= selectedStartTime));
-        if (notesToPlay.length > 0) {
-          notesToPlay.forEach(note => note.startTime -= selectedStartTime);
-          abcPlayer.play(notesToPlay);
-          timingCallbacksRef.current.start(selectedStartTime, 'seconds');
-        }
+        const index = parseInt(selectedElement.getAttribute('data-index') || '0');
+        const note = parsedNotes.find(note => note.index === index)
+        timingCallbacksRef.current.start(note?.beats, 'beats');
       } else {
-        abcPlayer.play(parsedNotes);
         timingCallbacksRef.current.start();
       }
       setIsPlaying(true);

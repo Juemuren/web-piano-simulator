@@ -19,9 +19,9 @@ export interface TransferFunction {
 export interface ABCNote {
   pitch: number;
   duration: number;
-  startTime: number;
   isRest?: boolean;
   hasStartTie?: boolean;
   hasEndTie?: boolean;
-  index: number;
+  index?: number;
+  beats?: number;
 }

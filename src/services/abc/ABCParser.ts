@@ -1,12 +1,12 @@
 import { type Accidental, parseOnly } from 'abcjs';
 import type { ABCNote } from '../../types';
-import { pitchToMidi, durationToSeconds } from './ABCHelper'
+import { pitchToMidi } from './ABCHelper'
 
 export class ABCParser {
   public accidentals: Accidental[];
 
   constructor() {
-    this.accidentals = []
+    this.accidentals = [];
   }
 
   parse(abcString: string): ABCNote[] | null {
@@ -14,28 +14,27 @@ export class ABCParser {
       const tunes = parseOnly(abcString);
       const tune = tunes?.[0];
       if (!tune) return null;
-      const tempo = tune.metaText?.tempo?.bpm ?? 120;
-      const meterDen = tune.getMeterFraction()?.den ?? 8
+      const beatPerMinute = tune.metaText?.tempo?.bpm ?? 120;
+      const meterDen = tune.getMeterFraction()?.den ?? 8;
       this.accidentals = tune.getKeySignature()?.accidentals ?? []
 
       const allNotes: ABCNote[] = [];
       const staffNotes = new Map<number, ABCNote[]>();
-      let globalTime = 0;
+      const beatsCountMap = new Map<number, number>();
       let index = 0;
 
       tune.lines?.forEach(line => {
-        let lineMaxTime = 0;
-
         line.staff?.forEach((staff, staffIndex) => {
           const prevStaffNotes = staffNotes.get(staffIndex) ?? [];
+          let beatsCount = beatsCountMap.get(staffIndex) ?? 0;
           const currentStaffNotes: ABCNote[] = [];
 
           staff.voices?.forEach(voice => {
-            let voiceTime = 0;
             voice.forEach(element => {
               if (element.el_type === 'note') {
-                const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
-                const duration = durationToSeconds(rawDuration, meterDen, tempo);
+                const rawDuration = element.duration;
+                const beats = rawDuration * meterDen
+                const duration = beats * 60 / beatPerMinute;
                 if (element.pitches && element.pitches.length > 0) {
                   element.pitches.forEach(pitch => {
                     const midiNote = pitchToMidi(pitch, this.accidentals);
@@ -51,42 +50,41 @@ export class ABCParser {
                         currentStaffNotes.push({
                           pitch: midiNote,
                           duration: 0,
-                          startTime: globalTime + voiceTime,
                           hasStartTie: pitch.startTie !== undefined,
                           hasEndTie: true,
-                          index
+                          index,
+                          beats: beatsCount,
                         })
                       }
                     } else if (element.rest) {
                       currentStaffNotes.push({
                         pitch: 0,
                         duration,
-                        startTime: globalTime + voiceTime,
                         isRest: true,
-                        index
+                        index,
+                        beats: beatsCount,
                       });
                     } else {
                       currentStaffNotes.push({
                         pitch: midiNote,
                         duration,
-                        startTime: globalTime + voiceTime,
                         isRest: false,
                         hasStartTie: pitch.startTie !== undefined,
-                        index
+                        index,
+                        beats: beatsCount,
                       });
                     }
                   });
                 }
                 index++;
-                voiceTime += duration;
-                lineMaxTime = Math.max(lineMaxTime, voiceTime);
+                beatsCount += beats;
               }
             });
             staffNotes.set(staffIndex, currentStaffNotes);
+            beatsCountMap.set(staffIndex, beatsCount)
           });
           allNotes.push(...currentStaffNotes);
         });
-        globalTime += lineMaxTime;
       });
 
       return allNotes
