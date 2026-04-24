@@ -11,7 +11,7 @@ export interface ABCPitch {
 export function pitchToMidi(pitch: ABCPitch, accidentals: Accidental[]): number {
   const defaultNotes = 60 // C4
   const octave_offset = [0, 2, 4, 5, 7, 9, 11];
-  const currentNotes = pitch?.verticalPos ?? defaultNotes
+  const currentNotes = pitch?.pitch ?? defaultNotes
   const octave = Math.floor(currentNotes / 7);
   const idx = ((currentNotes % 7) + 7) % 7;
   const correctedPos = octave * 12 + octave_offset[idx];

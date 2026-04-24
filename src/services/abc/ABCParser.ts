@@ -18,41 +18,50 @@ export class ABCParser {
       const meterDen = tune.getMeterFraction()?.den ?? 8
       this.accidentals = tune.getKeySignature()?.accidentals ?? []
 
-      const notes: ABCNote[] = [];
-      let currentTime = 0;
-      const voice = tune.lines
-        ?.flatMap(line => line.staff?.[0].voices?.[0])
-        .filter(el => el !== undefined);
+      const allNotes: ABCNote[] = [];
+      let globalTime = 0;
 
-      if (voice) {
-        for (const element of voice) {
-          if (element.el_type === 'note') {
-            const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
-            const duration = durationToSeconds(rawDuration, meterDen, tempo);
-            if (element.pitches && element.pitches.length > 0) {
-              element.pitches.forEach(pitch => {
-                const midiNote = pitchToMidi(pitch, this.accidentals);
-                notes.push({
-                  pitch: midiNote,
-                  duration,
-                  startTime: currentTime,
-                  isRest: false
-                });
-              });
-            } else if (element.rest) {
-              notes.push({
-                pitch: 0,
-                duration,
-                startTime: currentTime,
-                isRest: true
-              });
-            }
-            currentTime += duration;
-          }
-        }
-      }
+      tune.lines?.forEach(line => {
+        const lineNotes: ABCNote[] = [];
+        let lineMaxTime = 0;
 
-      return notes
+        line.staff?.forEach(staff => {
+          staff.voices?.forEach(voice => {
+            let voiceTime = 0;
+            voice.forEach(element => {
+              if (element.el_type === 'note') {
+                const rawDuration = typeof element.duration === 'number' ? element.duration : 1;
+                const duration = durationToSeconds(rawDuration, meterDen, tempo);
+                if (element.pitches && element.pitches.length > 0) {
+                  element.pitches.forEach(pitch => {
+                    const midiNote = pitchToMidi(pitch, this.accidentals);
+                    lineNotes.push({
+                      pitch: midiNote,
+                      duration,
+                      startTime: globalTime + voiceTime,
+                      isRest: false
+                    });
+                  });
+                } else if (element.rest) {
+                  lineNotes.push({
+                    pitch: 0,
+                    duration,
+                    startTime: globalTime + voiceTime,
+                    isRest: true
+                  });
+                }
+                voiceTime += duration;
+                lineMaxTime = Math.max(lineMaxTime, voiceTime);
+              }
+            });
+          });
+        });
+
+        allNotes.push(...lineNotes);
+        globalTime += lineMaxTime;
+      });
+
+      return allNotes
     } catch (error) {
       console.error('Error parsing ABC notation:', error);
       return null;
