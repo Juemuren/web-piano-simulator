@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { type AbcElem, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
@@ -38,6 +38,11 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     return abcParser.parse(abcInputMemo);
   }, [abcInputMemo, abcParser]);
 
+  const removeHighlight = () => {
+    document.querySelectorAll('.abcjs-highlight')
+      .forEach(el => el.classList.remove('abcjs-highlight'))
+  }
+
   useEffect(() => {
     if (!notationRef.current) return;
 
@@ -54,11 +59,6 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         add_classes: true,
       });
       visualObjRef.current = visualObjs[0];
-
-      const removeHighlight = () => {
-        document.querySelectorAll('.abcjs-highlight')
-          .forEach(el => el.classList.remove('abcjs-highlight'))
-      }
 
       timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
         eventCallback: (ev) => {
@@ -82,6 +82,16 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     }
   }, [parsedNotes, abcInputMemo, abcParser, audioEngine, onNoteStart, onNoteEnd]);
 
+  const stopPlayback = useCallback(() => {
+    abcPlayer.stop();
+    if (timingCallbacksRef.current) {
+      timingCallbacksRef.current.stop();
+    }
+    setIsPlaying(false);
+    onStop();
+    removeHighlight()
+  }, [abcPlayer, timingCallbacksRef, onStop]);
+
   const handlePlay = () => {
     if (parsedNotes && timingCallbacksRef.current) {
       const selectedElement = document.querySelector('.abcjs-note_selected');
@@ -103,15 +113,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   };
 
   const handleStop = () => {
-    abcPlayer.stop();
-    if (timingCallbacksRef.current) {
-      timingCallbacksRef.current.stop();
-    }
-    setIsPlaying(false);
-    onStop();
-
-    const lastSelection = document.querySelectorAll('.abcjs-highlight');
-    lastSelection.forEach(el => el.classList.remove('abcjs-highlight'));
+    stopPlayback();
   };
 
   // useEffect(() => {
@@ -123,10 +125,9 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
   useEffect(() => {
     return () => {
-      abcPlayer.stop();
-      onStop();
+      stopPlayback();
     };
-  }, [abcPlayer, onStop]);
+  }, [stopPlayback]);
 
   return (
     <div className="w-full max-w-4xl">
@@ -144,6 +145,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
                   setSelectedPreset(preset);
                   setHeader({ T: preset.T, M: preset.M, L: preset.L, K: preset.K, Q: preset.Q });
                   setBody(preset.body);
+                  if (isPlaying) stopPlayback();
                 } else {
                   setSelectedPreset(null);
                 }
@@ -167,6 +169,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
                   const value = field.type === 'number' ? parseInt(e.target.value) : e.target.value;
                   setHeader(prev => ({ ...prev, [field.key]: value }));
                   setSelectedPreset(null);
+                  if (isPlaying) stopPlayback();
                 }}
                 className="w-20 p-1 border border-slate-700 bg-slate-100 dark:bg-slate-900 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/50 transition-colors"
               />
@@ -180,6 +183,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           onChange={(e) => {
             setBody(e.target.value);
             setSelectedPreset(null);
+            if (isPlaying) stopPlayback();
           }}
           placeholder='输入乐谱或选择预设'
           className="w-full h-48 p-3 mb-4 border text-sm border-slate-700 bg-slate-100 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
