@@ -21,4 +21,6 @@ export interface ABCNote {
   duration: number;
   startTime: number;
   isRest?: boolean;
+  hasStartTie?: boolean;
+  hasEndTie?: boolean;
 }

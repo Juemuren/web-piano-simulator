@@ -19,13 +19,16 @@ export class ABCParser {
       this.accidentals = tune.getKeySignature()?.accidentals ?? []
 
       const allNotes: ABCNote[] = [];
+      const staffNotes = new Map<number, ABCNote[]>();
       let globalTime = 0;
 
       tune.lines?.forEach(line => {
-        const lineNotes: ABCNote[] = [];
         let lineMaxTime = 0;
 
-        line.staff?.forEach(staff => {
+        line.staff?.forEach((staff, staffIndex) => {
+          const prevStaffNotes = staffNotes.get(staffIndex) ?? [];
+          const currentStaffNotes: ABCNote[] = [];
+
           staff.voices?.forEach(voice => {
             let voiceTime = 0;
             voice.forEach(element => {
@@ -35,15 +38,35 @@ export class ABCParser {
                 if (element.pitches && element.pitches.length > 0) {
                   element.pitches.forEach(pitch => {
                     const midiNote = pitchToMidi(pitch, this.accidentals);
-                    lineNotes.push({
+                    if (pitch.endTie) {
+                      let prevNote
+                      if (currentStaffNotes.length > 0) {
+                        prevNote = currentStaffNotes.at(-1)
+                      } else {
+                        prevNote = prevStaffNotes.at(-1)
+                      }
+                      if (prevNote) {
+                        prevNote.duration += duration;
+                        currentStaffNotes.push({
+                          pitch: midiNote,
+                          duration: 0,
+                          startTime: globalTime + voiceTime,
+                          hasStartTie: pitch.startTie !== undefined,
+                          hasEndTie: true
+                        })
+                        return;
+                      }
+                    }
+                    currentStaffNotes.push({
                       pitch: midiNote,
                       duration,
                       startTime: globalTime + voiceTime,
-                      isRest: false
+                      isRest: false,
+                      hasStartTie: pitch.startTie !== undefined
                     });
                   });
                 } else if (element.rest) {
-                  lineNotes.push({
+                  currentStaffNotes.push({
                     pitch: 0,
                     duration,
                     startTime: globalTime + voiceTime,
@@ -54,10 +77,10 @@ export class ABCParser {
                 lineMaxTime = Math.max(lineMaxTime, voiceTime);
               }
             });
+            staffNotes.set(staffIndex, currentStaffNotes);
           });
+          allNotes.push(...currentStaffNotes);
         });
-
-        allNotes.push(...lineNotes);
         globalTime += lineMaxTime;
       });
 

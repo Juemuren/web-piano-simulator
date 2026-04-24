@@ -27,7 +27,7 @@ export class ABCPlayer {
         continue;
       }
       const startTimeoutId = window.setTimeout(() => {
-        if (this.isPlaying) {
+        if (this.isPlaying && !note.hasEndTie) {
           this.onNoteStart?.(note.pitch);
           this.audioEngine.playNote(note.pitch, note.duration);
         }
