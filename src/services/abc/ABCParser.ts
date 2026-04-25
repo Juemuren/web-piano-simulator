@@ -14,7 +14,6 @@ export class ABCParser {
     const tune = tunes?.[0];
     if (!tune) return null;
     const beatPerMinute = tune.metaText?.tempo?.bpm ?? 120;
-    const meterDen = tune.getMeterFraction()?.den ?? 8;
     this.accidentals = tune.getKeySignature()?.accidentals ?? []
 
     const allNotes: ABCNote[] = [];
@@ -32,7 +31,7 @@ export class ABCParser {
           voice.forEach(element => {
             if (element.el_type === 'note') {
               const rawDuration = element.duration;
-              const beats = rawDuration * meterDen
+              const beats = rawDuration / tune.getBeatLength()
               const duration = beats * 60 / beatPerMinute;
               if (element.rest) {
                 currentStaffNotes.push({

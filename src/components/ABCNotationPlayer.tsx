@@ -27,9 +27,9 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const headerFields = [
     { label: '标题', key: 'T' as keyof typeof header, type: 'text' as const, placeholder: '' },
     { label: '节拍', key: 'M' as keyof typeof header, type: 'text' as const, placeholder: '4/4' },
-    { label: '默认音符长度', key: 'L' as keyof typeof header, type: 'text' as const, placeholder: '1/4' },
+    { label: '默认音符长度', key: 'L' as keyof typeof header, type: 'text' as const, placeholder: '1/8' },
     { label: '调号', key: 'K' as keyof typeof header, type: 'text' as const, placeholder: 'C' },
-    { label: '速度', key: 'Q' as keyof typeof header, type: 'number' as const, placeholder: '120' },
+    { label: '速度', key: 'Q' as keyof typeof header, type: 'text' as const, placeholder: '120' },
   ];
 
   const abcInputMemo = useMemo(() => formatHeaderToABC(header) + body, [header, body]);
@@ -163,8 +163,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
                 placeholder={field.placeholder}
                 value={header[field.key] || ''}
                 onChange={(e) => {
-                  const value = field.type === 'number' ? parseInt(e.target.value) : e.target.value;
-                  setHeader(prev => ({ ...prev, [field.key]: value }));
+                  setHeader(prev => ({ ...prev, [field.key]: e.target.value }));
                   setSelectedPreset(null);
                   if (isPlaying) stopPlayback();
                 }}
