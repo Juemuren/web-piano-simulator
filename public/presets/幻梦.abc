@@ -3,7 +3,7 @@ L:1/8
 M:4/4
 Q:1/4=120
 K:Gm
-%%score { (R) | (L) }
+%%score { R | L }
 V:R clef=treble
 V:L clef=bass
 [V:R] z4 g d'2 c'/b/ | g4 g d'c' b | c'4 z2 z a | a4 a f2 a |
