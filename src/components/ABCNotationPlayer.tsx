@@ -4,7 +4,7 @@ import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
 import { pitchToMidi } from '../services/abc/ABCHelper';
 import { AudioEngine } from '../services/audio/AudioEngine';
-import { type ABCPreset, presets, formatHeaderToABC } from '../services/abc/ABCPresets';
+import { presets } from '../services/abc/ABCPresets';
 
 interface ABCNotationPlayerProps {
   audioEngine: AudioEngine;
@@ -17,26 +17,15 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const [abcPlayer] = useState(() => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd));
   const [abcParser] = useState(() => new ABCParser())
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState<ABCPreset | null>(null);
-  const [header, setHeader] = useState({ T: '', M: '4/4', L: '1/4', K: 'C', Q: 120 });
-  const [body, setBody] = useState('');
+  const [selectedPresetIndex, setSelectedPresetIndex] = useState<number>(-1);
+  const [abcContent, setAbcContent] = useState('');
   const notationRef = useRef<HTMLDivElement | null>(null);
   const visualObjRef = useRef<TuneObject>(null);
   const timingCallbacksRef = useRef<TimingCallbacks | null>(null);
 
-  const headerFields = [
-    { label: '标题', key: 'T' as keyof typeof header, type: 'text' as const, placeholder: '' },
-    { label: '节拍', key: 'M' as keyof typeof header, type: 'text' as const, placeholder: '4/4' },
-    { label: '默认音符长度', key: 'L' as keyof typeof header, type: 'text' as const, placeholder: '1/8' },
-    { label: '调号', key: 'K' as keyof typeof header, type: 'text' as const, placeholder: 'C' },
-    { label: '速度', key: 'Q' as keyof typeof header, type: 'text' as const, placeholder: '120' },
-  ];
-
-  const abcInputMemo = useMemo(() => formatHeaderToABC(header) + body, [header, body]);
-
   const parsedNotes = useMemo(() => {
-    return abcParser.parse(abcInputMemo);
-  }, [abcInputMemo, abcParser]);
+    return abcContent ? abcParser.parse(abcContent) : null;
+  }, [abcContent, abcParser]);
 
   const removeHighlight = () => {
     document.querySelectorAll('.abcjs-highlight')
@@ -48,7 +37,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     notationRef.current.innerHTML = '';
 
     if (parsedNotes) {
-      const visualObjs = renderAbc(notationRef.current, abcInputMemo, {
+      const visualObjs = renderAbc(notationRef.current, abcContent, {
         responsive: 'resize',
         add_classes: true,
         clickListener: (abcElem) => {
@@ -82,7 +71,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
               noteGroup.forEach((element: Element) => {
                 const index = parseInt(element.getAttribute('data-index') || '0');
                 const notes = parsedNotes.filter(note => note.index === index)
-                notes.forEach(note =>abcPlayer.play(note))
+                notes.forEach(note => abcPlayer.play(note))
                 element.classList.add('abcjs-highlight');
               });
             });
@@ -91,7 +80,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         }
       });
     }
-  }, [parsedNotes, abcInputMemo, abcParser, audioEngine, onNoteStart, onNoteEnd, abcPlayer]);
+  }, [parsedNotes, abcContent, abcParser, audioEngine, onNoteStart, onNoteEnd, abcPlayer]);
 
   const stopPlayback = useCallback(() => {
     if (timingCallbacksRef.current) {
@@ -129,56 +118,46 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   return (
     <div className="w-full max-w-4xl">
       <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
-
-        <div className="flex flex-1 mb-4 justify-evenly flex-wrap">
-          <div className="flex flex-col items-center">
-            <span className="text-xs mb-1 font-medium text-slate-600 dark:text-slate-400">预设</span>
-            <select
-              value={selectedPreset ? presets.indexOf(selectedPreset) : -1}
-              onChange={(e) => {
-                const index = parseInt(e.target.value);
-                if (index >= 0) {
-                  const preset = presets[index];
-                  setSelectedPreset(preset);
-                  setHeader({ T: preset.T, M: preset.M, L: preset.L, K: preset.K, Q: preset.Q });
-                  setBody(preset.body);
+        <div className="flex flex-col mb-3 gap-3">
+          <select
+            value={selectedPresetIndex}
+            onChange={async (e) => {
+              const index = parseInt(e.target.value);
+              setSelectedPresetIndex(index);
+              if (index >= 0) {
+                const preset = presets[index];
+                try {
+                  const response = await fetch(preset.path);
+                  const content = await response.text();
+                  setAbcContent(content);
                   if (isPlaying) stopPlayback();
-                } else {
-                  setSelectedPreset(null);
+                } catch (error) {
+                  console.error('Failed to load preset:', error);
                 }
-              }}
-              className="w-30 p-1 border border-slate-700 bg-slate-100 dark:bg-slate-900 rounded"
-            >
-              <option value={-1}>自定义</option>
-              {presets.map((preset, index) => (
-                <option key={index} value={index}>{preset.T}</option>
-              ))}
-            </select>
-          </div>
-          {headerFields.map(field => (
-            <div key={field.key} className="flex flex-col items-center">
-              <span className="text-xs mb-1 font-medium text-slate-600 dark:text-slate-400">{field.label}</span>
-              <input
-                type={field.type}
-                placeholder={field.placeholder}
-                value={header[field.key] || ''}
-                onChange={(e) => {
-                  setHeader(prev => ({ ...prev, [field.key]: e.target.value }));
-                  setSelectedPreset(null);
-                  if (isPlaying) stopPlayback();
-                }}
-                className="w-20 p-1 border border-slate-700 bg-slate-100 dark:bg-slate-900 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/50 transition-colors"
-              />
-            </div>
-          ))}
+              } else {
+                setAbcContent('');
+              }
+              if (isPlaying) stopPlayback();
+            }}
+            className="
+                w-full rounded-2xl border border-slate-700 px-3 py-2
+                focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25
+                dark:bg-slate-800/70 dark:text-slate-100
+              "
+          >
+            <option value={-1}>自定义</option>
+            {presets.map((preset, index) => (
+              <option key={index} value={index}>{preset.name}</option>
+            ))}
+          </select>
         </div>
 
         <textarea
           id="abc-input"
-          value={body}
+          value={abcContent}
           onChange={(e) => {
-            setBody(e.target.value);
-            setSelectedPreset(null);
+            setAbcContent(e.target.value);
+            setSelectedPresetIndex(-1);
             if (isPlaying) stopPlayback();
           }}
           placeholder='输入乐谱或选择预设'

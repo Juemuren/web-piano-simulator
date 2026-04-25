@@ -88,27 +88,25 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
 
   return (
     <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
-      <div className="mb-2 flex flex-col gap-3">
-        <div className="space-y-2">
-          <select
-            value={selectedPreset}
-            onChange={(e) => { handlePresetChange(e.target.value as TimbrePreset); }}
-            className="
+      <div className="flex flex-col mb-2 gap-3">
+        <select
+          value={selectedPreset}
+          onChange={(e) => { handlePresetChange(e.target.value as TimbrePreset); }}
+          className="
               w-full rounded-2xl border border-slate-700 px-3 py-2
               focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25
               dark:bg-slate-800/70 dark:text-slate-100
             "
-          >
-            <option value="ethereal">空灵</option>
-            <option value="metallic">金属</option>
-            <option value="pure">纯净</option>
-            <option value="bright">明亮</option>
-            <option value="normal">常规</option>
-            <option value="soft">柔和</option>
-            <option value="realistic">真实</option>
-            <option value="custom">自定义</option>
-          </select>
-        </div>
+        >
+          <option value="ethereal">空灵</option>
+          <option value="metallic">金属</option>
+          <option value="pure">纯净</option>
+          <option value="bright">明亮</option>
+          <option value="normal">常规</option>
+          <option value="soft">柔和</option>
+          <option value="realistic">真实</option>
+          <option value="custom">自定义</option>
+        </select>
       </div>
 
       {selectedPreset === 'normal' && (
