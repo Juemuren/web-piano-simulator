@@ -45,10 +45,11 @@ export class ABCParser {
                 element.pitches?.forEach(pitch => {
                   const midiPitch = pitchToMidi(pitch, this.accidentals);
                   if (pitch.endTie) {
-                    let prevNote
-                    prevNote = currentStaffNotes.find(note => note.isStartTie)
+                    let lastTieStart = currentStaffNotes.findLast(note => note.isStartTie)
+                    let prevNote = currentStaffNotes.find(note => note.index === lastTieStart?.index && note.pitch === midiPitch)
                     if (!prevNote) {
-                      prevNote = prevStaffNotes.find(note => note.isStartTie)
+                      lastTieStart = prevStaffNotes.findLast(note => note.isStartTie)
+                      prevNote = prevStaffNotes.find(note => note.index === lastTieStart?.index && note.pitch === midiPitch)
                     }
                     if (prevNote && prevNote?.isStartTie) {
                       prevNote.duration += duration;
