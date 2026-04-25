@@ -136,9 +136,10 @@ export class AudioEngine {
     for (let n = 1; n <= harmonics; n++) {
       const osc = this.audioContext.createOscillator();
       const gain = this.audioContext.createGain();
+      const now = this.audioContext.currentTime;
 
       const freq = baseFreq * n;
-      osc.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+      osc.frequency.setValueAtTime(freq, now);
       osc.type = this.oscillatorType;
 
       // 处理振幅
@@ -150,17 +151,20 @@ export class AudioEngine {
       const phaseDeg = phases[n - 1] || 0;
       const phaseDelay = phaseDeg / (360 * freq);
 
-      // 高频谐波快速衰减
-      const releaseTime = this.releaseTime / Math.sqrt(n);
-      const decayTime = this.decayTime / Math.sqrt(n);
+      const startTime = Math.max(0, now + phaseDelay);
+      const attackEnd = startTime + this.attackTime;
+      const decayEnd = attackEnd + this.decayTime / Math.sqrt(n);
+      const sustainEnd = decayEnd + duration;
+      const stopTime = sustainEnd + this.releaseTime / Math.sqrt(n);
 
-      const startTime = Math.max(0, this.audioContext.currentTime + phaseDelay);
-      const stopTime = startTime + duration + decayTime + releaseTime;
-      const targetGain = Math.max(amplitude, this.silenceGain);
+      const attackGain = Math.max(amplitude, this.silenceGain);
+      const decayGain = Math.max(attackGain * this.sustainGain, this.silenceGain);
+      const sustainGain = Math.max(decayGain / Math.sqrt(n), this.silenceGain)
 
       gain.gain.setValueAtTime(this.silenceGain, startTime);
-      gain.gain.exponentialRampToValueAtTime(targetGain, startTime + this.attackTime);
-      gain.gain.exponentialRampToValueAtTime(this.sustainGain * targetGain, startTime + this.attackTime + decayTime);
+      gain.gain.exponentialRampToValueAtTime(attackGain, attackEnd);
+      gain.gain.exponentialRampToValueAtTime(decayGain, decayEnd);
+      gain.gain.exponentialRampToValueAtTime(sustainGain, sustainEnd);
       gain.gain.exponentialRampToValueAtTime(this.silenceGain, stopTime);
 
       osc.connect(gain);
