@@ -10,8 +10,8 @@ interface TimbreSelectorProps {
 const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
   const [selectedPreset, setSelectedPreset] = useState<TimbrePreset>('ethereal');
   const [lambda, setLambda] = useState(0.5);
-  const [sigma, setSigma] = useState(0.1);
-  const [p, setP] = useState(2);
+  const [sigma, setSigma] = useState(0.8);
+  const [p, setP] = useState(1.5);
   const [amplitudes, setAmplitudes] = useState<number[]>(() => generatePresetTimbre('ethereal').amplitudes);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
           <input
             type="range"
             min="0.01"
-            max="0.5"
+            max="1"
             step="0.01"
             value={sigma}
             onChange={handleSigmaChange}
@@ -155,7 +155,7 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
           </div>
           <input
             type="range"
-            min="1"
+            min="0.5"
             max="4"
             step="0.1"
             value={p}
