@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { AudioEngine } from '../services/audio/AudioEngine';
-import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
 import { presets } from '../services/abc/ABCPresets';
 
@@ -14,19 +13,13 @@ interface ABCNotationPlayerProps {
 
 export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd, onStop }: ABCNotationPlayerProps) {
   const [abcPlayer] = useState(() => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd));
-  const [abcParser] = useState(() => new ABCParser())
   const [isPlaying, setIsPlaying] = useState(false);
+  const [hasNotes, setHasNotes] = useState(false)
   const [selectedPresetIndex, setSelectedPresetIndex] = useState<number>(-1);
   const [selectedBeats, setSelectedBeats] = useState<number>(0)
   const [abcContent, setAbcContent] = useState('');
-  const notationRef = useRef<HTMLDivElement | null>(null);
   const visualObjRef = useRef<TuneObject>(null);
   const timingCallbacksRef = useRef<TimingCallbacks | null>(null);
-
-  const hasNotes = useMemo(() => {
-    abcParser.parse(abcContent)
-    return !abcParser.isEmpty;
-  }, [abcContent, abcParser]);
 
   const removeHighlight = () => {
     document.querySelectorAll('.abcjs-highlight')
@@ -40,25 +33,27 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   }
 
   useEffect(() => {
-    if (!notationRef.current) return;
-
-    const visualObjs = renderAbc(notationRef.current, abcContent, {
+    const visualObjs = renderAbc('abcjs-paper', abcContent, {
       responsive: 'resize',
       add_classes: true,
       clickListener: (abcElem) => {
         const currentSelectedNote = abcElem.currentTrackWholeNotes ?? 0;
-        if (Array.isArray(currentSelectedNote)) {
-          setSelectedBeats(currentSelectedNote[0] * abcParser.beatsPerMeasure)
-        } else {
-          setSelectedBeats(currentSelectedNote * abcParser.beatsPerMeasure)
-        }
-        if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
-          abcPlayer.play(abcElem.midiPitches)
+        if (visualObjRef.current) {
+          const beatsPerMeasure = visualObjRef.current?.getBeatsPerMeasure()
+          if (Array.isArray(currentSelectedNote)) {
+            setSelectedBeats(currentSelectedNote[0] * beatsPerMeasure)
+          } else {
+            setSelectedBeats(currentSelectedNote * beatsPerMeasure)
+          }
+          if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
+            abcPlayer.play(abcElem.midiPitches)
+          }
         }
       },
     });
     visualObjRef.current = visualObjs[0];
     visualObjRef.current.setUpAudio({})
+    setHasNotes(visualObjRef.current.lines.length > 0)
 
     timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
       eventCallback: (ev) => {
@@ -67,20 +62,17 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           setIsPlaying(false)
           return
         };
-
         removeHighlight()
-        if (ev.elements) {
-          ev.elements.forEach(noteGroup => {
-            addHighlight(noteGroup)
-          });
-        }
+        ev.elements?.forEach(noteGroup => {
+          addHighlight(noteGroup)
+        });
         if (ev.midiPitches) {
           abcPlayer.play(ev.midiPitches)
         }
         return "continue"
       }
     });
-  }, [abcContent, abcParser, abcPlayer]);
+  }, [abcContent, abcPlayer]);
 
   const stopPlayback = useCallback(() => {
     if (timingCallbacksRef.current) {
@@ -158,12 +150,10 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           )}
         </div>
 
-        {hasNotes && (
-          <div
-            ref={notationRef}
-            className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
-          />
-        )}
+        <div
+          id='abcjs-paper'
+          className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
+        />
       </div>
     </div>
   );
