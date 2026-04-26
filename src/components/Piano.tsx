@@ -46,7 +46,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
   const blackKeyWidth = 24;
   const whiteKeyHeight = 160;
   const blackKeyHeight = 100;
-  const avgKeyWidth = 21
+  const avgKeyWidth = 20
   const maxNumKeys = 85 // C1 -> C8
   const minNumKeys = 13 // C4 -> C5
   const centerNote = 66; // F#4
