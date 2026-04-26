@@ -11,17 +11,14 @@ function Footer() {
       <div className="mx-auto grid w-full max-w-4xl gap-5 border-t border-slate-200 pt-6 dark:border-slate-800 sm:grid-cols-[1.15fr_0.85fr] sm:items-start">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-            使用说明
+            使用技巧
           </p>
           <ul className="mt-2 text-base leading-7">
             <li>
               单击音符会选中并播放单个音符
             </li>
             <li>
-              双击音符会从选中处开始演奏整个乐谱
-            </li>
-            <li>
-              开始播放会从被选中音符处开始演奏整个乐谱
+              双击音符会从选中处演奏整个乐谱
             </li>
           </ul>
         </div>
