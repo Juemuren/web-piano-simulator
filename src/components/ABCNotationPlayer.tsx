@@ -11,15 +11,23 @@ interface ABCNotationPlayerProps {
   onStop: () => void;
 }
 
+const DOUBLE_CLICK_INTERVAL_MS = 500;
+
+interface LastClickedNote {
+  index: number;
+  beats: number;
+  clickedAt: number;
+}
+
 export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd, onStop }: ABCNotationPlayerProps) {
   const [abcPlayer] = useState(() => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd));
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasNotes, setHasNotes] = useState(false)
   const [selectedPresetIndex, setSelectedPresetIndex] = useState<number>(-1);
-  const [selectedBeats, setSelectedBeats] = useState<number>(0)
   const [abcContent, setAbcContent] = useState('');
   const visualObjRef = useRef<TuneObject>(null);
   const timingCallbacksRef = useRef<TimingCallbacks | null>(null);
+  const lastClickedNoteRef = useRef<LastClickedNote | null>(null);
 
   const removeHighlight = () => {
     document.querySelectorAll('.abcjs-highlight')
@@ -42,13 +50,52 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     return currentSelectedNote / beatLength;
   }
 
+  const getSelectedIndex = () => {
+    const selectedElement = document.querySelector('.abcjs-note_selected');
+    return parseInt(selectedElement?.getAttribute('data-index') || '0');
+  }
+
+  const handleStop = useCallback(() => {
+    if (timingCallbacksRef.current) {
+      timingCallbacksRef.current.stop();
+    }
+    setIsPlaying(false);
+    onStop();
+    removeHighlight()
+  }, [timingCallbacksRef, onStop]);
+
+  const handlePlay = () => {
+    if (timingCallbacksRef.current) {
+      timingCallbacksRef.current.stop();
+      timingCallbacksRef.current.start(lastClickedNoteRef.current?.beats, 'beats');
+      setIsPlaying(true);
+    }
+  };
+
   useEffect(() => {
     const visualObjs = renderAbc('abcjs-paper', abcContent, {
       responsive: 'resize',
       add_classes: true,
       clickListener: (abcElem) => {
-        setSelectedBeats(getSelectedBeat(abcElem))
         if (visualObjRef.current) {
+          const now = performance.now();
+          const clickedIndex = getSelectedIndex();
+          const prevClickedNote = lastClickedNoteRef.current;
+          lastClickedNoteRef.current = {
+            index: clickedIndex,
+            beats: getSelectedBeat(abcElem),
+            clickedAt: now
+          };
+
+          if (
+            prevClickedNote?.index === clickedIndex &&
+            now - prevClickedNote.clickedAt <= DOUBLE_CLICK_INTERVAL_MS
+          ) {
+            handleStop()
+            handlePlay()
+            return
+          }
+
           if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
             abcPlayer.play(abcElem.midiPitches)
           }
@@ -76,27 +123,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         return "continue"
       }
     });
-  }, [abcContent, abcPlayer]);
-
-  const stopPlayback = useCallback(() => {
-    if (timingCallbacksRef.current) {
-      timingCallbacksRef.current.stop();
-    }
-    setIsPlaying(false);
-    onStop();
-    removeHighlight()
-  }, [timingCallbacksRef, onStop]);
-
-  const handlePlay = () => {
-    if (timingCallbacksRef.current) {
-      timingCallbacksRef.current.start(selectedBeats, 'beats')
-      setIsPlaying(true);
-    }
-  };
-
-  const handleStop = () => {
-    stopPlayback();
-  };
+  }, [abcContent, abcPlayer, handleStop]);
 
   return (
     <div className="w-full max-w-4xl">
@@ -112,11 +139,11 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
                 const response = await fetch(preset.path);
                 const content = await response.text();
                 setAbcContent(content);
-                if (isPlaying) stopPlayback();
+                if (isPlaying) handleStop();
               } else {
                 setAbcContent('');
               }
-              if (isPlaying) stopPlayback();
+              if (isPlaying) handleStop();
             }}
             className="
                 w-full rounded-2xl border border-slate-700 px-3 py-2
@@ -137,7 +164,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           onChange={(e) => {
             setAbcContent(e.target.value);
             setSelectedPresetIndex(-1);
-            if (isPlaying) stopPlayback();
+            if (isPlaying) handleStop();
           }}
           placeholder='输入乐谱或选择预设'
           className="w-full h-48 p-3 mb-4 border text-sm border-slate-700 bg-slate-100 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"

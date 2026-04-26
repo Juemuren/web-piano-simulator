@@ -15,10 +15,13 @@ function Footer() {
           </p>
           <ul className="mt-2 text-base leading-7">
             <li>
-              点击乐谱会演奏选中的音符
+              单击音符会选中并播放单个音符
             </li>
             <li>
-              自动演奏会从被选中音符处开始
+              双击音符会从选中处开始演奏整个乐谱
+            </li>
+            <li>
+              开始播放会从被选中音符处开始演奏整个乐谱
             </li>
           </ul>
         </div>
