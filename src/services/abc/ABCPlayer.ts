@@ -12,19 +12,19 @@ export class ABCPlayer {
     this.onNoteEnd = onNoteEnd;
   }
 
-  // TODO 支持 MidiPitch 的更多属性
   playSinglePitch(midiPitch: MidiPitch) {
-    this.onNoteStart?.(midiPitch.pitch);
-    this.audioEngine.playNote(midiPitch.pitch, midiPitch.duration);
+    const { pitch, duration, volume, cents } = midiPitch
+
+    this.onNoteStart?.(pitch);
+    this.audioEngine.playNote(pitch, duration, volume, cents);
     setTimeout(() => {
-      this.onNoteEnd?.(midiPitch.pitch);
-    }, (midiPitch.duration) * 1000);
-  }
+      this.onNoteEnd?.(pitch);
+    }, duration * 1000);
+  };
 
   play(midiPitches: MidiPitches) {
     midiPitches.forEach(midiPitch => {
       this.playSinglePitch(midiPitch)
     })
   }
-
 }

@@ -113,15 +113,15 @@ export class AudioEngine {
     }
   }
 
-  getFrequency(note: number): number {
-    return 440 * Math.pow(2, (note - 69) / 12);
+  getFrequency(pitch: number): number {
+    return 440 * Math.pow(2, (pitch - 69) / 12);
   }
 
-  async playNote(note: number, duration: number = 1) {
+  async playNote(pitch: number, duration: number, volume: number, cents: number = 0) {
     await this.ensureAudioContextRunning();
     if (!this.audioContext) return;
 
-    const baseFreq = this.getFrequency(note);
+    const baseFreq = this.getFrequency(pitch + cents / 100);
     const harmonics = this.currentTimbre.amplitudes.length;
     const transferFunction = this.currentTransferFunction
     const { magnitudes, phases } = computeTransferFunction(
@@ -145,7 +145,7 @@ export class AudioEngine {
       // 处理振幅
       const timbreAmp = this.currentTimbre.amplitudes[n - 1] || 0;
       const transferMag = magnitudes[n - 1] || 0;
-      const amplitude = timbreAmp * transferMag * this.volume;
+      const amplitude = timbreAmp * transferMag * this.volume * (volume / 127);
 
       // 处理相位
       const phaseDeg = phases[n - 1] || 0;
