@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { type MidiPitches, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
+import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
+import { AudioEngine } from '../services/audio/AudioEngine';
 import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
-import { AudioEngine } from '../services/audio/AudioEngine';
 import { presets } from '../services/abc/ABCPresets';
 
 interface ABCNotationPlayerProps {
@@ -41,58 +41,46 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
 
   useEffect(() => {
     if (!notationRef.current) return;
-    notationRef.current.innerHTML = '';
 
-    const playMidiPitches = (midiPitches: MidiPitches) => {
-      midiPitches.forEach(midiPitch => {
-        abcPlayer.play({
-          pitch: midiPitch.pitch,
-          duration: midiPitch.duration
-        })
-      })
-    }
-
-    if (hasNotes) {
-      const visualObjs = renderAbc(notationRef.current, abcContent, {
-        responsive: 'resize',
-        add_classes: true,
-        clickListener: (abcElem) => {
-          const currentSelectedNote = abcElem.currentTrackWholeNotes ?? 0;
-          if (Array.isArray(currentSelectedNote)) {
-            setSelectedBeats(currentSelectedNote[0] * abcParser.beatsPerMeasure)
-          } else {
-            setSelectedBeats(currentSelectedNote * abcParser.beatsPerMeasure)
-          }
-          if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
-            playMidiPitches(abcElem.midiPitches)
-          }
-        },
-      });
-      visualObjRef.current = visualObjs[0];
-      visualObjRef.current.setUpAudio({})
-
-      timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
-        eventCallback: (ev) => {
-          if (!ev) {
-            removeHighlight()
-            setIsPlaying(false)
-            return
-          };
-
-          removeHighlight()
-          if (ev.elements) {
-            ev.elements.forEach(noteGroup => {
-              addHighlight(noteGroup)
-            });
-          }
-          if (ev.midiPitches) {
-            playMidiPitches(ev.midiPitches)
-          }
-          return "continue"
+    const visualObjs = renderAbc(notationRef.current, abcContent, {
+      responsive: 'resize',
+      add_classes: true,
+      clickListener: (abcElem) => {
+        const currentSelectedNote = abcElem.currentTrackWholeNotes ?? 0;
+        if (Array.isArray(currentSelectedNote)) {
+          setSelectedBeats(currentSelectedNote[0] * abcParser.beatsPerMeasure)
+        } else {
+          setSelectedBeats(currentSelectedNote * abcParser.beatsPerMeasure)
         }
-      });
-    }
-  }, [hasNotes, abcContent, abcParser, abcPlayer]);
+        if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
+          abcPlayer.play(abcElem.midiPitches)
+        }
+      },
+    });
+    visualObjRef.current = visualObjs[0];
+    visualObjRef.current.setUpAudio({})
+
+    timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
+      eventCallback: (ev) => {
+        if (!ev) {
+          removeHighlight()
+          setIsPlaying(false)
+          return
+        };
+
+        removeHighlight()
+        if (ev.elements) {
+          ev.elements.forEach(noteGroup => {
+            addHighlight(noteGroup)
+          });
+        }
+        if (ev.midiPitches) {
+          abcPlayer.play(ev.midiPitches)
+        }
+        return "continue"
+      }
+    });
+  }, [abcContent, abcParser, abcPlayer]);
 
   const stopPlayback = useCallback(() => {
     if (timingCallbacksRef.current) {
@@ -104,7 +92,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   }, [timingCallbacksRef, onStop]);
 
   const handlePlay = () => {
-    if (hasNotes && timingCallbacksRef.current) {
+    if (timingCallbacksRef.current) {
       timingCallbacksRef.current.start(selectedBeats, 'beats')
       setIsPlaying(true);
     }

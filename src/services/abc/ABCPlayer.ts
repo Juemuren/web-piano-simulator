@@ -1,5 +1,5 @@
 import { AudioEngine } from '../audio/AudioEngine';
-import type { ABCPitch } from '../../types';
+import { type MidiPitch, type MidiPitches } from 'abcjs';
 
 export class ABCPlayer {
   private audioEngine: AudioEngine;
@@ -12,11 +12,19 @@ export class ABCPlayer {
     this.onNoteEnd = onNoteEnd;
   }
 
-  play(note: ABCPitch) {
-    this.onNoteStart?.(note.pitch);
-    this.audioEngine.playNote(note.pitch, note.duration);
+  // TODO 支持 MidiPitch 的更多属性
+  playSinglePitch(midiPitch: MidiPitch) {
+    this.onNoteStart?.(midiPitch.pitch);
+    this.audioEngine.playNote(midiPitch.pitch, midiPitch.duration);
     setTimeout(() => {
-      this.onNoteEnd?.(note.pitch);
-    }, (note.duration) * 1000);
+      this.onNoteEnd?.(midiPitch.pitch);
+    }, (midiPitch.duration) * 1000);
   }
+
+  play(midiPitches: MidiPitches) {
+    midiPitches.forEach(midiPitch => {
+      this.playSinglePitch(midiPitch)
+    })
+  }
+
 }

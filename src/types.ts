@@ -15,8 +15,3 @@ export interface TransferFunction {
   magnitudes: number[];
   phases: number[];
 }
-
-export interface ABCPitch {
-  pitch: number;
-  duration: number;
-}
