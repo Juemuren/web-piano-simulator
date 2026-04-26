@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
+import { type AbcElem, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
 import { presets } from '../services/abc/ABCPresets';
@@ -32,19 +32,23 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     });
   }
 
+  const getSelectedBeat = (abcElem: AbcElem) => {
+    const currentSelectedNote = abcElem.currentTrackWholeNotes ?? 0;
+    const beatLength = visualObjRef.current?.getBeatLength() ?? 1;
+
+    if (Array.isArray(currentSelectedNote)) {
+      return currentSelectedNote[0] / beatLength;
+    }
+    return currentSelectedNote / beatLength;
+  }
+
   useEffect(() => {
     const visualObjs = renderAbc('abcjs-paper', abcContent, {
       responsive: 'resize',
       add_classes: true,
       clickListener: (abcElem) => {
-        const currentSelectedNote = abcElem.currentTrackWholeNotes ?? 0;
+        setSelectedBeats(getSelectedBeat(abcElem))
         if (visualObjRef.current) {
-          const beatsPerMeasure = visualObjRef.current?.getBeatsPerMeasure()
-          if (Array.isArray(currentSelectedNote)) {
-            setSelectedBeats(currentSelectedNote[0] * beatsPerMeasure)
-          } else {
-            setSelectedBeats(currentSelectedNote * beatsPerMeasure)
-          }
           if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
             abcPlayer.play(abcElem.midiPitches)
           }
