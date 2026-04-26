@@ -168,7 +168,10 @@ export class AudioEngine {
         attackGain * this.sustainGain,
         this.silenceGain,
       );
-      const sustainGain = Math.max(decayGain / Math.sqrt(n), this.silenceGain);
+      const sustainGain = Math.max(
+        decayGain / Math.sqrt(1 + n),
+        this.silenceGain,
+      );
 
       gain.gain.setValueAtTime(this.silenceGain, startTime);
       gain.gain.exponentialRampToValueAtTime(attackGain, attackEnd);
