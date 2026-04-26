@@ -73,6 +73,10 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   };
 
   useEffect(() => {
+    lastClickedNoteRef.current = null
+  }, [abcContent])
+
+  useEffect(() => {
     const visualObjs = renderAbc('abcjs-paper', abcContent, {
       responsive: 'resize',
       add_classes: true,
