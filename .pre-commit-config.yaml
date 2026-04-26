@@ -11,3 +11,8 @@ repos:
         entry: npm run lint
         language: node
         pass_filenames: false
+      - id: npm-format
+        name: Npm Format
+        entry: npm run format
+        language: node
+        pass_filenames: false
