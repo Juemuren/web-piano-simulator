@@ -14,5 +14,9 @@
   {
     "name": "幻梦",
     "path": "presets/幻梦.abc"
+  },
+  {
+    "name": "约会大作战",
+    "path": "presets/约会大作战.abc"
   }
 ]
