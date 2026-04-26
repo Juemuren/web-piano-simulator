@@ -61,16 +61,18 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     }
     setIsPlaying(false);
     onStop();
-    removeHighlight()
+    removeHighlight();
   }, [timingCallbacksRef, onStop]);
 
-  const handlePlay = () => {
+  const handlePlay = useCallback(() => {
+    onStop();
+    removeHighlight();
     if (timingCallbacksRef.current) {
       timingCallbacksRef.current.stop();
       timingCallbacksRef.current.start(lastClickedNoteRef.current?.beats, 'beats');
       setIsPlaying(true);
     }
-  };
+  }, [onStop]);
 
   useEffect(() => {
     lastClickedNoteRef.current = null
@@ -127,7 +129,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         return "continue"
       }
     });
-  }, [abcContent, abcPlayer, handleStop]);
+  }, [abcContent, abcPlayer, handleStop, handlePlay]);
 
   return (
     <div className="w-full max-w-4xl">
