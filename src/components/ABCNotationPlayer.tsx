@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { type AbcElem, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
+import {
+  type AbcElem,
+  type TuneObject,
+  renderAbc,
+  TimingCallbacks,
+} from 'abcjs';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
 import { presets } from '../services/abc/ABCPresets';
@@ -19,10 +24,17 @@ interface LastClickedNote {
   clickedAt: number;
 }
 
-export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd, onStop }: ABCNotationPlayerProps) {
-  const [abcPlayer] = useState(() => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd));
+export default function ABCNotationPlayer({
+  audioEngine,
+  onNoteStart,
+  onNoteEnd,
+  onStop,
+}: ABCNotationPlayerProps) {
+  const [abcPlayer] = useState(
+    () => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd),
+  );
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasNotes, setHasNotes] = useState(false)
+  const [hasNotes, setHasNotes] = useState(false);
   const [selectedPresetIndex, setSelectedPresetIndex] = useState<number>(-1);
   const [abcContent, setAbcContent] = useState('');
   const visualObjRef = useRef<TuneObject>(null);
@@ -30,15 +42,16 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const lastClickedNoteRef = useRef<LastClickedNote | null>(null);
 
   const removeHighlight = () => {
-    document.querySelectorAll('.abcjs-highlight')
-      .forEach(el => el.classList.remove('abcjs-highlight'))
-  }
+    document
+      .querySelectorAll('.abcjs-highlight')
+      .forEach((el) => el.classList.remove('abcjs-highlight'));
+  };
 
   const addHighlight = (elements: HTMLElement[]) => {
-    elements.forEach(element => {
+    elements.forEach((element) => {
       element.classList.add('abcjs-highlight');
     });
-  }
+  };
 
   const getSelectedBeat = (abcElem: AbcElem) => {
     const currentSelectedNote = abcElem.currentTrackWholeNotes ?? 0;
@@ -48,12 +61,12 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
       return currentSelectedNote[0] / beatLength;
     }
     return currentSelectedNote / beatLength;
-  }
+  };
 
   const getSelectedIndex = () => {
     const selectedElement = document.querySelector('.abcjs-note_selected');
     return parseInt(selectedElement?.getAttribute('data-index') || '0');
-  }
+  };
 
   const handleStop = useCallback(() => {
     if (timingCallbacksRef.current) {
@@ -69,14 +82,17 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
     removeHighlight();
     if (timingCallbacksRef.current) {
       timingCallbacksRef.current.stop();
-      timingCallbacksRef.current.start(lastClickedNoteRef.current?.beats, 'beats');
+      timingCallbacksRef.current.start(
+        lastClickedNoteRef.current?.beats,
+        'beats',
+      );
       setIsPlaying(true);
     }
   }, [onStop]);
 
   useEffect(() => {
-    lastClickedNoteRef.current = null
-  }, [abcContent])
+    lastClickedNoteRef.current = null;
+  }, [abcContent]);
 
   useEffect(() => {
     const visualObjs = renderAbc('abcjs-paper', abcContent, {
@@ -90,44 +106,44 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           lastClickedNoteRef.current = {
             index: clickedIndex,
             beats: getSelectedBeat(abcElem),
-            clickedAt: now
+            clickedAt: now,
           };
 
           if (
             prevClickedNote?.index === clickedIndex &&
             now - prevClickedNote.clickedAt <= DOUBLE_CLICK_INTERVAL_MS
           ) {
-            handleStop()
-            handlePlay()
-            return
+            handleStop();
+            handlePlay();
+            return;
           }
 
           if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
-            abcPlayer.play(abcElem.midiPitches)
+            abcPlayer.play(abcElem.midiPitches);
           }
         }
       },
     });
     visualObjRef.current = visualObjs[0];
-    visualObjRef.current.setUpAudio({})
-    setHasNotes(visualObjRef.current.lines.length > 0)
+    visualObjRef.current.setUpAudio({});
+    setHasNotes(visualObjRef.current.lines.length > 0);
 
     timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
       eventCallback: (ev) => {
         if (!ev) {
-          removeHighlight()
-          setIsPlaying(false)
-          return
-        };
-        removeHighlight()
-        ev.elements?.forEach(noteGroup => {
-          addHighlight(noteGroup)
+          removeHighlight();
+          setIsPlaying(false);
+          return;
+        }
+        removeHighlight();
+        ev.elements?.forEach((noteGroup) => {
+          addHighlight(noteGroup);
         });
         if (ev.midiPitches) {
-          abcPlayer.play(ev.midiPitches)
+          abcPlayer.play(ev.midiPitches);
         }
-        return "continue"
-      }
+        return 'continue';
+      },
     });
   }, [abcContent, abcPlayer, handleStop, handlePlay]);
 
@@ -159,7 +175,9 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           >
             <option value={-1}>自定义</option>
             {presets.map((preset, index) => (
-              <option key={index} value={index}>{preset.name}</option>
+              <option key={index} value={index}>
+                {preset.name}
+              </option>
             ))}
           </select>
         </div>
@@ -172,7 +190,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
             setSelectedPresetIndex(-1);
             if (isPlaying) handleStop();
           }}
-          placeholder='输入乐谱或选择预设'
+          placeholder="输入乐谱或选择预设"
           className="w-full h-48 p-3 mb-4 border text-sm border-slate-700 bg-slate-100 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
         />
 
@@ -188,7 +206,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         </div>
 
         <div
-          id='abcjs-paper'
+          id="abcjs-paper"
           className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
         />
       </div>

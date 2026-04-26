@@ -6,9 +6,9 @@ type CollapsibleSectionProps = {
 };
 
 function CollapsibleSection({ title, children }: CollapsibleSectionProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleToggle = () => setIsExpanded(!isExpanded)
+  const handleToggle = () => setIsExpanded(!isExpanded);
 
   return (
     <div className="w-full max-w-4xl">

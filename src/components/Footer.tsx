@@ -2,10 +2,8 @@ import { type ReactNode, useState } from 'react';
 
 const articleUrl =
   'https://juemuren.github.io/MyBlogs/posts/math/%E9%9F%B3%E4%B9%90%E7%9A%84%E6%95%B0%E5%AD%A6%E5%8E%9F%E7%90%86/';
-const repositoryUrl =
-  'https://github.com/Juemuren/web-piano-simulator/';
-const abcUrl =
-  'https://abcnotation.com/learn'
+const repositoryUrl = 'https://github.com/Juemuren/web-piano-simulator/';
+const abcUrl = 'https://abcnotation.com/learn';
 
 type FooterPanelProps = {
   title: string;
@@ -24,7 +22,7 @@ function FooterPanel({ title, children }: FooterPanelProps) {
     <section className="rounded-lg border border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950/60">
       <button
         type="button"
-        onClick={() => setIsExpanded(prev => !prev)}
+        onClick={() => setIsExpanded((prev) => !prev)}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80"
         aria-expanded={isExpanded}
       >
@@ -73,7 +71,8 @@ function Footer() {
             乐谱使用 ABC Notation 编码格式，详细的标准请阅读官方给出的学习资源
           </FooterPanel>
           <FooterPanel title="运行原理">
-            钢琴声音基于 Web Audio 进行纯物理合成，数学原理和代码实现可以参考给出的链接
+            钢琴声音基于 Web Audio
+            进行纯物理合成，数学原理和代码实现可以参考给出的链接
           </FooterPanel>
         </div>
 

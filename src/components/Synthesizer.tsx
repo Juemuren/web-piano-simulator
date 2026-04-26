@@ -5,8 +5,12 @@ interface SynthesizerSettingsProps {
   audioEngine: AudioEngine;
 }
 
-const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }) => {
-  const [oscillatorType, setOscillatorType] = useState(audioEngine.getOscillatorType());
+const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({
+  audioEngine,
+}) => {
+  const [oscillatorType, setOscillatorType] = useState(
+    audioEngine.getOscillatorType(),
+  );
   const [volume, setVolume] = useState(audioEngine.getVolume());
   const [attackTime, setAttackTime] = useState(audioEngine.getAttackTime());
   const [decayTime, setDelayTime] = useState(audioEngine.getDelayTime());
@@ -48,7 +52,9 @@ const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({ audioEngine }
         <div className="space-y-2">
           <select
             value={oscillatorType}
-            onChange={(e) => setOscillatorType(e.target.value as OscillatorType)}
+            onChange={(e) =>
+              setOscillatorType(e.target.value as OscillatorType)
+            }
             className="
               w-full rounded-2xl border border-slate-700 px-3 py-2
               focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25

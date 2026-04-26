@@ -8,11 +8,14 @@ interface TimbreSelectorProps {
 }
 
 const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
-  const [selectedPreset, setSelectedPreset] = useState<TimbrePreset>('ethereal');
+  const [selectedPreset, setSelectedPreset] =
+    useState<TimbrePreset>('ethereal');
   const [lambda, setLambda] = useState(0.5);
   const [sigma, setSigma] = useState(0.8);
   const [p, setP] = useState(1.5);
-  const [amplitudes, setAmplitudes] = useState<number[]>(() => generatePresetTimbre('ethereal').amplitudes);
+  const [amplitudes, setAmplitudes] = useState<number[]>(
+    () => generatePresetTimbre('ethereal').amplitudes,
+  );
 
   useEffect(() => {
     audioEngine.setTimbre({
@@ -56,9 +59,10 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
     const value = parseFloat(e.target.value);
     setSigma(value);
     if (selectedPreset === 'soft' || selectedPreset === 'realistic') {
-      const presetTimbre = selectedPreset === 'soft'
-        ? generatePresetTimbre('soft', undefined, value)
-        : generatePresetTimbre('realistic', undefined, value, p);
+      const presetTimbre =
+        selectedPreset === 'soft'
+          ? generatePresetTimbre('soft', undefined, value)
+          : generatePresetTimbre('realistic', undefined, value, p);
       setAmplitudes(presetTimbre.amplitudes);
     }
   };
@@ -67,7 +71,12 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
     const value = parseFloat(e.target.value);
     setP(value);
     if (selectedPreset === 'realistic') {
-      const presetTimbre = generatePresetTimbre('realistic', undefined, sigma, value);
+      const presetTimbre = generatePresetTimbre(
+        'realistic',
+        undefined,
+        sigma,
+        value,
+      );
       setAmplitudes(presetTimbre.amplitudes);
     }
   };
@@ -81,17 +90,20 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
     });
   };
 
-  const harmonicLabels = Array.from({ length: 10 }, (_, index) =>
+  const harmonicLabels = Array.from({ length: 10 }, (_, index) => (
     <span>
       f<sub>{index + 1}</sub>
-    </span>);
+    </span>
+  ));
 
   return (
     <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
       <div className="flex flex-col mb-2 gap-3">
         <select
           value={selectedPreset}
-          onChange={(e) => { handlePresetChange(e.target.value as TimbrePreset); }}
+          onChange={(e) => {
+            handlePresetChange(e.target.value as TimbrePreset);
+          }}
           className="
               w-full rounded-2xl border border-slate-700 px-3 py-2
               focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25
@@ -174,11 +186,15 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
                 max="1"
                 step="0.01"
                 value={amp}
-                onChange={(e) => handleAmplitudeChange(index, parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleAmplitudeChange(index, parseFloat(e.target.value))
+                }
                 className="h-3 w-36 -rotate-90 appearance-none rounded-full bg-slate-700/80 accent-indigo-400"
               />
             </div>
-            <div className="text-xs text-slate-400">{harmonicLabels[index]}</div>
+            <div className="text-xs text-slate-400">
+              {harmonicLabels[index]}
+            </div>
           </div>
         ))}
       </div>

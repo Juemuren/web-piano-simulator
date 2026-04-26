@@ -6,7 +6,10 @@ interface PianoProps {
   playingNotes?: Set<number>;
 }
 
-const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) => {
+const Piano: React.FC<PianoProps> = ({
+  audioEngine,
+  playingNotes = new Set(),
+}) => {
   const [pressedKeys, setPressedKeys] = useState<Set<number>>(new Set());
   const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
 
@@ -25,17 +28,23 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
     audioEngine.playNote(note, 1, 100);
   };
 
-  const handleKeyDown = (e: React.MouseEvent | React.TouchEvent, note: number) => {
+  const handleKeyDown = (
+    e: React.MouseEvent | React.TouchEvent,
+    note: number,
+  ) => {
     if (!('touches' in e)) {
       e.preventDefault();
     }
-    setPressedKeys(prev => new Set(prev).add(note));
+    setPressedKeys((prev) => new Set(prev).add(note));
     playNote(note);
   };
 
-  const handleKeyUp = (e: React.MouseEvent | React.TouchEvent, note: number) => {
+  const handleKeyUp = (
+    e: React.MouseEvent | React.TouchEvent,
+    note: number,
+  ) => {
     e.preventDefault();
-    setPressedKeys(prev => {
+    setPressedKeys((prev) => {
       const newSet = new Set(prev);
       newSet.delete(note);
       return newSet;
@@ -46,15 +55,31 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
   const blackKeyWidth = 24;
   const whiteKeyHeight = 160;
   const blackKeyHeight = 100;
-  const avgKeyWidth = 20
-  const maxNumKeys = 85 // C1 -> C8
-  const minNumKeys = 13 // C4 -> C5
+  const avgKeyWidth = 20;
+  const maxNumKeys = 85; // C1 -> C8
+  const minNumKeys = 13; // C4 -> C5
   const centerNote = 66; // F#4
 
-  const numKeys = Math.min(maxNumKeys, Math.max(minNumKeys, Math.floor(windowWidth / avgKeyWidth)));
+  const numKeys = Math.min(
+    maxNumKeys,
+    Math.max(minNumKeys, Math.floor(windowWidth / avgKeyWidth)),
+  );
   const startNote = centerNote - Math.floor((numKeys - 1) / 2);
 
-  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const noteNames = [
+    'C',
+    'C#',
+    'D',
+    'D#',
+    'E',
+    'F',
+    'F#',
+    'G',
+    'G#',
+    'A',
+    'A#',
+    'B',
+  ];
   const whiteKeys = [];
   const blackKeys = [];
   for (let index = 0; index < numKeys; index++) {
@@ -66,7 +91,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
       char: name[0],
       number: octave,
     };
-    
+
     if (name.includes('#')) {
       const whiteKeyIndex = whiteKeys.length;
       blackKeys.push({ ...keyInfo, position: whiteKeyIndex });
@@ -80,7 +105,8 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
       <div className="relative inline-block" style={{ height: whiteKeyHeight }}>
         <div className="flex">
           {whiteKeys.map((key) => {
-            const isPressed = pressedKeys.has(key.note) || playingNotes.has(key.note);
+            const isPressed =
+              pressedKeys.has(key.note) || playingNotes.has(key.note);
             return (
               <button
                 key={key.note}
@@ -102,16 +128,20 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
                 }}
               >
                 <span className="flex flex-col items-center justify-end h-full pb-2">
-                  <span>{key.char}<sub>{key.number}</sub></span>
+                  <span>
+                    {key.char}
+                    <sub>{key.number}</sub>
+                  </span>
                 </span>
               </button>
             );
           })}
         </div>
-        
+
         <div className="flex absolute top-0 left-0">
           {blackKeys.map((key) => {
-            const isPressed = pressedKeys.has(key.note) || playingNotes.has(key.note);
+            const isPressed =
+              pressedKeys.has(key.note) || playingNotes.has(key.note);
             return (
               <button
                 key={key.note}
@@ -134,8 +164,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
                   transform: isPressed ? 'translateY(2px)' : 'translateY(0px)',
                   zIndex: 10,
                 }}
-              >
-              </button>
+              ></button>
             );
           })}
         </div>

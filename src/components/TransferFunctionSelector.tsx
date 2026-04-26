@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import type { TransferFunctionPreset, TransferFunction } from '../types';
-import { computeTransferFunction, generatePresetTransferFunction } from '../services/audio/AudioPresets';
+import {
+  computeTransferFunction,
+  generatePresetTransferFunction,
+} from '../services/audio/AudioPresets';
 import { AudioEngine } from '../services/audio/AudioEngine';
 
 interface TransferFunctionSelectorProps {
   audioEngine: AudioEngine;
 }
 
-const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ audioEngine }) => {
-  const [transferFunction, setTransferFunction] = useState<TransferFunction>(() => generatePresetTransferFunction('delay', 0, 0, 2000));
+const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({
+  audioEngine,
+}) => {
+  const [transferFunction, setTransferFunction] = useState<TransferFunction>(
+    () => generatePresetTransferFunction('delay', 0, 0, 2000),
+  );
   const [baseFreq, setBaseFreq] = useState<number>(440);
   const selectedPreset = transferFunction.type as TransferFunctionPreset;
   const displayTransferFunction = computeTransferFunction(
@@ -24,20 +31,33 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
   }, [transferFunction, audioEngine]);
 
   const handlePresetChange = (preset: TransferFunctionPreset) => {
-    setTransferFunction((prev) => generatePresetTransferFunction(preset, prev.tau, prev.alpha, prev.fc));
+    setTransferFunction((prev) =>
+      generatePresetTransferFunction(preset, prev.tau, prev.alpha, prev.fc),
+    );
   };
 
-  const updatePresetParams = (updates: Partial<Pick<TransferFunction, 'tau' | 'alpha' | 'fc'>>) => {
+  const updatePresetParams = (
+    updates: Partial<Pick<TransferFunction, 'tau' | 'alpha' | 'fc'>>,
+  ) => {
     setTransferFunction((prev) => {
       const type = prev.type as TransferFunctionPreset;
-      return generatePresetTransferFunction(type, updates.tau ?? prev.tau, updates.alpha ?? prev.alpha, updates.fc ?? prev.fc);
+      return generatePresetTransferFunction(
+        type,
+        updates.tau ?? prev.tau,
+        updates.alpha ?? prev.alpha,
+        updates.fc ?? prev.fc,
+      );
     });
   };
 
-  const harmonicLabels = Array.from({ length: displayTransferFunction.magnitudes.length }, (_, index) =>
-    <span key={`label-${index}`}>
-      f<sub>{index + 1}</sub>
-    </span>);
+  const harmonicLabels = Array.from(
+    { length: displayTransferFunction.magnitudes.length },
+    (_, index) => (
+      <span key={`label-${index}`}>
+        f<sub>{index + 1}</sub>
+      </span>
+    ),
+  );
 
   return (
     <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
@@ -45,7 +65,9 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
         <div className="space-y-2">
           <select
             value={selectedPreset}
-            onChange={(e) => handlePresetChange(e.target.value as TransferFunctionPreset)}
+            onChange={(e) =>
+              handlePresetChange(e.target.value as TransferFunctionPreset)
+            }
             className="
               w-full rounded-2xl border border-slate-700 px-3 py-2
               focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25
@@ -68,10 +90,10 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
           <span className="font-semibold">{baseFreq} Hz</span>
         </div>
         <input
-          type='number'
-          placeholder='440'
-          min='20'
-          max='20000'
+          type="number"
+          placeholder="440"
+          min="20"
+          max="20000"
           value={baseFreq}
           onChange={(e) => setBaseFreq(parseInt(e.target.value, 10))}
           className="w-full rounded-2xl border border-slate-700 px-3 py-2
@@ -80,11 +102,16 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
         />
       </div>
 
-      {(selectedPreset === 'delay' || selectedPreset === 'single_echo' || selectedPreset === 'multi_echo' || selectedPreset === 'allpass') && (
+      {(selectedPreset === 'delay' ||
+        selectedPreset === 'single_echo' ||
+        selectedPreset === 'multi_echo' ||
+        selectedPreset === 'allpass') && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span>延迟时间</span>
-            <span className="font-semibold">{transferFunction.tau.toFixed(1)} ms</span>
+            <span className="font-semibold">
+              {transferFunction.tau.toFixed(1)} ms
+            </span>
           </div>
           <input
             type="range"
@@ -92,17 +119,23 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
             max="100"
             step="0.1"
             value={transferFunction.tau}
-            onChange={(e) => updatePresetParams({ tau: parseFloat(e.target.value) })}
+            onChange={(e) =>
+              updatePresetParams({ tau: parseFloat(e.target.value) })
+            }
             className="w-full accent-indigo-400"
           />
         </div>
       )}
 
-      {(selectedPreset === 'single_echo' || selectedPreset === 'multi_echo' || selectedPreset === 'allpass') && (
+      {(selectedPreset === 'single_echo' ||
+        selectedPreset === 'multi_echo' ||
+        selectedPreset === 'allpass') && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span>衰减系数</span>
-            <span className="font-semibold">{transferFunction.alpha.toFixed(2)}</span>
+            <span className="font-semibold">
+              {transferFunction.alpha.toFixed(2)}
+            </span>
           </div>
           <input
             type="range"
@@ -110,7 +143,9 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
             max="0.5"
             step="0.01"
             value={transferFunction.alpha}
-            onChange={(e) => updatePresetParams({ alpha: parseFloat(e.target.value) })}
+            onChange={(e) =>
+              updatePresetParams({ alpha: parseFloat(e.target.value) })
+            }
             className="w-full accent-indigo-400"
           />
         </div>
@@ -128,17 +163,21 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
             max="20000"
             step="10"
             value={transferFunction.fc}
-            onChange={(e) => updatePresetParams({ fc: parseFloat(e.target.value) })}
+            onChange={(e) =>
+              updatePresetParams({ fc: parseFloat(e.target.value) })
+            }
             className="w-full accent-indigo-400"
           />
         </div>
       )}
 
-
       <h3 className="mb-2 text-lg font-medium">幅频特性</h3>
       <div className="flex items-end gap-2 overflow-x-auto px-1 pb-3">
         {displayTransferFunction.magnitudes.map((mag, index) => (
-          <div key={`mag-${index}`} className="flex flex-1 flex-col items-center gap-3">
+          <div
+            key={`mag-${index}`}
+            className="flex flex-1 flex-col items-center gap-3"
+          >
             <div className="text-xs">{mag.toFixed(2)}</div>
             <div className="relative flex h-36 w-8 items-center justify-center">
               <input
@@ -151,7 +190,9 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
                 className="h-3 w-36 -rotate-90 appearance-none rounded-full bg-slate-700/80 accent-indigo-400 cursor-not-allowed"
               />
             </div>
-            <div className="text-xs text-slate-400">{harmonicLabels[index]}</div>
+            <div className="text-xs text-slate-400">
+              {harmonicLabels[index]}
+            </div>
           </div>
         ))}
       </div>
@@ -159,7 +200,10 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
       <h3 className="mb-2 text-lg font-medium">相频特性</h3>
       <div className="flex items-end gap-2 overflow-x-auto px-1 pb-3">
         {displayTransferFunction.phases.map((phase, index) => (
-          <div key={`phase-${index}`} className="flex flex-1 flex-col items-center gap-3">
+          <div
+            key={`phase-${index}`}
+            className="flex flex-1 flex-col items-center gap-3"
+          >
             <div className="text-xs">{phase.toFixed(0)}°</div>
             <div className="relative flex h-36 w-8 items-center justify-center">
               <input
@@ -172,7 +216,9 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({ aud
                 className="h-3 w-36 -rotate-90 appearance-none rounded-full bg-slate-700/80 accent-indigo-400 cursor-not-allowed"
               />
             </div>
-            <div className="text-xs text-slate-400">{harmonicLabels[index]}</div>
+            <div className="text-xs text-slate-400">
+              {harmonicLabels[index]}
+            </div>
           </div>
         ))}
       </div>

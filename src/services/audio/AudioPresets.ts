@@ -1,11 +1,19 @@
 import type {
-  TransferFunction, TransferFunctionPreset,
-  Timbre, TimbrePreset
+  TransferFunction,
+  TransferFunctionPreset,
+  Timbre,
+  TimbrePreset,
 } from '../../types';
 
-export const normalizeAngle = (angle: number) => (((angle % 360) + 540) % 360) - 180;
+export const normalizeAngle = (angle: number) =>
+  (((angle % 360) + 540) % 360) - 180;
 
-export function generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lambda?: number, sigma?: number, p?: number): Timbre {
+export function generatePresetTimbre(
+  type: Exclude<TimbrePreset, 'custom'>,
+  lambda?: number,
+  sigma?: number,
+  p?: number,
+): Timbre {
   const harmonics = 10;
   const amplitudes: number[] = [];
 
@@ -38,7 +46,7 @@ export function generatePresetTimbre(type: Exclude<TimbrePreset, 'custom'>, lamb
   }
 
   const maxAmp = Math.max(...amplitudes, 1);
-  const normalized = amplitudes.map(a => a / maxAmp);
+  const normalized = amplitudes.map((a) => a / maxAmp);
   return { type, amplitudes: normalized };
 }
 
@@ -70,7 +78,8 @@ export function computeTransferFunction(
         const cosArg = Math.cos(arg);
         const sinArg = Math.sin(arg);
         mag = Math.sqrt(1 + alpha * alpha + 2 * alpha * cosArg);
-        phaseDeg = -Math.atan2(alpha * sinArg, 1 + alpha * cosArg) * 180 / Math.PI;
+        phaseDeg =
+          (-Math.atan2(alpha * sinArg, 1 + alpha * cosArg) * 180) / Math.PI;
         break;
       }
       case 'multi_echo': {
@@ -78,7 +87,8 @@ export function computeTransferFunction(
         const cosArg2 = Math.cos(arg2);
         const sinArg2 = Math.sin(arg2);
         mag = 1 / Math.sqrt(1 + alpha * alpha - 2 * alpha * cosArg2);
-        phaseDeg = -Math.atan2(alpha * sinArg2, 1 - alpha * cosArg2) * 180 / Math.PI;
+        phaseDeg =
+          (-Math.atan2(alpha * sinArg2, 1 - alpha * cosArg2) * 180) / Math.PI;
         break;
       }
       case 'lowpass': {
@@ -96,7 +106,11 @@ export function computeTransferFunction(
         const cosArg3 = Math.cos(arg3);
         const sinArg3 = Math.sin(arg3);
         mag = 1;
-        phaseDeg = normalizeAngle(-360 * tau_s * freq - 2 * Math.atan2(alpha * sinArg3, 1 - alpha * cosArg3) * 180 / Math.PI);
+        phaseDeg = normalizeAngle(
+          -360 * tau_s * freq -
+            (2 * Math.atan2(alpha * sinArg3, 1 - alpha * cosArg3) * 180) /
+              Math.PI,
+        );
         break;
       }
     }
@@ -114,7 +128,13 @@ export function generatePresetTransferFunction(
   alpha: number = 0,
   fc: number = 2000,
 ): TransferFunction {
-  const { magnitudes, phases } = computeTransferFunction(type, tau, alpha, fc, 440);
+  const { magnitudes, phases } = computeTransferFunction(
+    type,
+    tau,
+    alpha,
+    fc,
+    440,
+  );
   return {
     type,
     tau,
