@@ -23,8 +23,9 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const visualObjRef = useRef<TuneObject>(null);
   const timingCallbacksRef = useRef<TimingCallbacks | null>(null);
 
-  const parsedResult = useMemo(() => {
-    return abcContent ? abcParser.parse(abcContent) : null;
+  const hasNotes = useMemo(() => {
+    abcParser.parse(abcContent)
+    return !abcParser.isEmpty;
   }, [abcContent, abcParser]);
 
   const removeHighlight = () => {
@@ -51,7 +52,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
       })
     }
 
-    if (parsedResult) {
+    if (hasNotes) {
       const visualObjs = renderAbc(notationRef.current, abcContent, {
         responsive: 'resize',
         add_classes: true,
@@ -91,7 +92,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         }
       });
     }
-  }, [parsedResult, abcContent, abcParser, abcPlayer]);
+  }, [hasNotes, abcContent, abcParser, abcPlayer]);
 
   const stopPlayback = useCallback(() => {
     if (timingCallbacksRef.current) {
@@ -103,7 +104,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   }, [timingCallbacksRef, onStop]);
 
   const handlePlay = () => {
-    if (parsedResult && timingCallbacksRef.current) {
+    if (hasNotes && timingCallbacksRef.current) {
       timingCallbacksRef.current.start(selectedBeats, 'beats')
       setIsPlaying(true);
     }
@@ -159,7 +160,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         />
 
         <div className="flex justify-center">
-          {parsedResult && (
+          {hasNotes && (
             <button
               onClick={isPlaying ? handleStop : handlePlay}
               className={`px-4 py-2 text-white rounded-2xl transition-colors ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
@@ -169,7 +170,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           )}
         </div>
 
-        {parsedResult && (
+        {hasNotes && (
           <div
             ref={notationRef}
             className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"

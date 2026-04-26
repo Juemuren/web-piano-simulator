@@ -1,5 +1,5 @@
 import { AudioEngine } from '../audio/AudioEngine';
-import type { ABCNote } from '../../types';
+import type { ABCPitch } from '../../types';
 
 export class ABCPlayer {
   private audioEngine: AudioEngine;
@@ -12,10 +12,7 @@ export class ABCPlayer {
     this.onNoteEnd = onNoteEnd;
   }
 
-  play(note: ABCNote) {
-    if (note.isRest || note.isEndTie) {
-      return;
-    }
+  play(note: ABCPitch) {
     this.onNoteStart?.(note.pitch);
     this.audioEngine.playNote(note.pitch, note.duration);
     setTimeout(() => {

@@ -16,12 +16,7 @@ export interface TransferFunction {
   phases: number[];
 }
 
-export interface ABCNote {
+export interface ABCPitch {
   pitch: number;
   duration: number;
-  isRest?: boolean;
-  isStartTie?: boolean;
-  isEndTie?: boolean;
-  index?: number;
-  beats?: number;
 }
