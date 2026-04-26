@@ -76,7 +76,7 @@ const Piano: React.FC<PianoProps> = ({ audioEngine, playingNotes = new Set() }) 
   }
 
   return (
-    <div className="w-full overflow-x-auto py-4">
+    <div className="w-full py-4">
       <div className="relative inline-block" style={{ height: whiteKeyHeight }}>
         <div className="flex">
           {whiteKeys.map((key) => {
