@@ -4,9 +4,11 @@ import { pitchToMidi } from './ABCHelper'
 
 export class ABCParser {
   public accidentals: Accidental[];
+  public beatsPerMeasure: number;
 
   constructor() {
     this.accidentals = [];
+    this.beatsPerMeasure = 0;
   }
 
   parse(abcString: string): ABCNote[] | null {
@@ -14,7 +16,8 @@ export class ABCParser {
     const tune = tunes?.[0];
     if (!tune) return null;
     const beatPerMinute = tune.metaText?.tempo?.bpm ?? 120;
-    this.accidentals = tune.getKeySignature()?.accidentals ?? []
+    this.accidentals = tune.getKeySignature()?.accidentals ?? [];
+    this.beatsPerMeasure = tune.getBeatsPerMeasure();
 
     const allNotes: ABCNote[] = [];
     const staffNotes = new Map<number, ABCNote[]>();

@@ -1,5 +1,5 @@
 diff --git a/node_modules/abcjs/types/index.d.ts b/node_modules/abcjs/types/index.d.ts
-index de64044..051032d 100644
+index de64044..4473b2f 100644
 --- a/node_modules/abcjs/types/index.d.ts
 +++ b/node_modules/abcjs/types/index.d.ts
 @@ -791,7 +791,16 @@ declare module 'abcjs' {
@@ -20,7 +20,22 @@ index de64044..051032d 100644
  		rest?: { type: 'rest' | 'spacer' | 'invisible' | 'invisible-multimeasure' | 'multimeasure', text? : number};
  	}
  	export type VoiceItem = VoiceItemClef | VoiceItemBar | VoiceItemGap | VoiceItemKey | VoiceItemMeter | VoiceItemMidi | VoiceItemOverlay | VoiceItemPart | VoiceItemScale | VoiceItemStem | VoiceItemStyle | VoiceItemTempo | VoiceItemTranspose | VoiceItemNote;
-@@ -948,6 +957,7 @@ declare module 'abcjs' {
+@@ -935,6 +944,9 @@ declare module 'abcjs' {
+ 	export interface AbcElem {
+ 		el_type: string; //TODO enumerate these
+ 		abselem: AbsoluteElement;
++		averagepitch: number;
++		maxpitch: number;
++		minpitch: number;
+ 		beambr?: number;
+ 		chord?: Array<{name: string; position: ChordPlacement}>
+ 		decoration: Array<string> //TODO enumerate these
+@@ -945,9 +957,12 @@ declare module 'abcjs' {
+ 		gracenotes?: Array<{duration: number; name:string; pitch: number; verticalPosition: number;}>
+ 		lyric?: Array<{syllable: string; divider: ' ' | '-' | '_';}>
+ 		noStem?: boolean
++		currentTrackMilliseconds?: number
++		currentTrackWholeNotes?: number | Array<number>
  		midiPitches?: MidiPitches;
  		midiGraceNotePitches?: MidiGracePitches;
  		pitches?: Array<{

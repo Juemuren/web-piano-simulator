@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
+import { type MidiPitches, type TuneObject, renderAbc, TimingCallbacks } from 'abcjs';
 import { ABCParser } from '../services/abc/ABCParser';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
-import { pitchToMidi } from '../services/abc/ABCHelper';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { presets } from '../services/abc/ABCPresets';
 
@@ -18,12 +17,13 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const [abcParser] = useState(() => new ABCParser())
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedPresetIndex, setSelectedPresetIndex] = useState<number>(-1);
+  const [selectedBeats, setSelectedBeats] = useState<number>(0)
   const [abcContent, setAbcContent] = useState('');
   const notationRef = useRef<HTMLDivElement | null>(null);
   const visualObjRef = useRef<TuneObject>(null);
   const timingCallbacksRef = useRef<TimingCallbacks | null>(null);
 
-  const parsedNotes = useMemo(() => {
+  const parsedResult = useMemo(() => {
     return abcContent ? abcParser.parse(abcContent) : null;
   }, [abcContent, abcParser]);
 
@@ -32,31 +32,43 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
       .forEach(el => el.classList.remove('abcjs-highlight'))
   }
 
+  const addHighlight = (elements: HTMLElement[]) => {
+    elements.forEach(element => {
+      element.classList.add('abcjs-highlight');
+    });
+  }
+
   useEffect(() => {
     if (!notationRef.current) return;
     notationRef.current.innerHTML = '';
 
-    if (parsedNotes) {
+    const playMidiPitches = (midiPitches: MidiPitches) => {
+      midiPitches.forEach(midiPitch => {
+        abcPlayer.play({
+          pitch: midiPitch.pitch,
+          duration: midiPitch.duration
+        })
+      })
+    }
+
+    if (parsedResult) {
       const visualObjs = renderAbc(notationRef.current, abcContent, {
         responsive: 'resize',
         add_classes: true,
         clickListener: (abcElem) => {
-          if (abcElem.pitches && abcElem.pitches.length > 0) {
-            abcElem.pitches.forEach(abcPitch => {
-              const midiPitch = pitchToMidi({
-                name: abcPitch.name,
-                pitch: abcPitch.pitch,
-                accidental: abcPitch.accidental
-              }, abcParser.accidentals);
-              abcPlayer.play({
-                pitch: midiPitch,
-                duration: abcElem.duration
-              })
-            })
+          const currentSelectedNote = abcElem.currentTrackWholeNotes ?? 0;
+          if (Array.isArray(currentSelectedNote)) {
+            setSelectedBeats(currentSelectedNote[0] * abcParser.beatsPerMeasure)
+          } else {
+            setSelectedBeats(currentSelectedNote * abcParser.beatsPerMeasure)
+          }
+          if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
+            playMidiPitches(abcElem.midiPitches)
           }
         },
       });
       visualObjRef.current = visualObjs[0];
+      visualObjRef.current.setUpAudio({})
 
       timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
         eventCallback: (ev) => {
@@ -65,22 +77,21 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
             setIsPlaying(false)
             return
           };
+
           removeHighlight()
           if (ev.elements) {
-            ev.elements.forEach((noteGroup: Element[]) => {
-              noteGroup.forEach((element: Element) => {
-                const index = parseInt(element.getAttribute('data-index') || '0');
-                const notes = parsedNotes.filter(note => note.index === index)
-                notes.forEach(note => abcPlayer.play(note))
-                element.classList.add('abcjs-highlight');
-              });
+            ev.elements.forEach(noteGroup => {
+              addHighlight(noteGroup)
             });
+          }
+          if (ev.midiPitches) {
+            playMidiPitches(ev.midiPitches)
           }
           return "continue"
         }
       });
     }
-  }, [parsedNotes, abcContent, abcParser, audioEngine, onNoteStart, onNoteEnd, abcPlayer]);
+  }, [parsedResult, abcContent, abcParser, abcPlayer]);
 
   const stopPlayback = useCallback(() => {
     if (timingCallbacksRef.current) {
@@ -92,15 +103,8 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   }, [timingCallbacksRef, onStop]);
 
   const handlePlay = () => {
-    if (parsedNotes && timingCallbacksRef.current) {
-      const selectedElement = document.querySelector('.abcjs-note_selected');
-      if (selectedElement) {
-        const index = parseInt(selectedElement.getAttribute('data-index') || '0');
-        const note = parsedNotes.find(note => note.index === index)
-        timingCallbacksRef.current.start(note?.beats, 'beats');
-      } else {
-        timingCallbacksRef.current.start();
-      }
+    if (parsedResult && timingCallbacksRef.current) {
+      timingCallbacksRef.current.start(selectedBeats, 'beats')
       setIsPlaying(true);
     }
   };
@@ -108,12 +112,6 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
   const handleStop = () => {
     stopPlayback();
   };
-
-  useEffect(() => {
-    return () => {
-      stopPlayback();
-    };
-  }, [stopPlayback]);
 
   return (
     <div className="w-full max-w-4xl">
@@ -126,14 +124,10 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
               setSelectedPresetIndex(index);
               if (index >= 0) {
                 const preset = presets[index];
-                try {
-                  const response = await fetch(preset.path);
-                  const content = await response.text();
-                  setAbcContent(content);
-                  if (isPlaying) stopPlayback();
-                } catch (error) {
-                  console.error('Failed to load preset:', error);
-                }
+                const response = await fetch(preset.path);
+                const content = await response.text();
+                setAbcContent(content);
+                if (isPlaying) stopPlayback();
               } else {
                 setAbcContent('');
               }
@@ -165,7 +159,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
         />
 
         <div className="flex justify-center">
-          {parsedNotes && (
+          {parsedResult && (
             <button
               onClick={isPlaying ? handleStop : handlePlay}
               className={`px-4 py-2 text-white rounded-2xl transition-colors ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
@@ -175,7 +169,7 @@ export default function ABCNotationPlayer({ audioEngine, onNoteStart, onNoteEnd,
           )}
         </div>
 
-        {parsedNotes && (
+        {parsedResult && (
           <div
             ref={notationRef}
             className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
