@@ -162,7 +162,7 @@ const Piano: React.FC<PianoProps> = ({
                   position: 'absolute',
                   left: key.position * whiteKeyWidth - blackKeyWidth / 2,
                   transform: isPressed ? 'translateY(2px)' : 'translateY(0px)',
-                  zIndex: 10,
+                  zIndex: 1,
                 }}
               ></button>
             );

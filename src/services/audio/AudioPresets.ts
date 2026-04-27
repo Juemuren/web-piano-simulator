@@ -1,20 +1,20 @@
 import type {
   TransferFunction,
-  TransferFunctionPreset,
+  TransferFunctionType,
   Timbre,
-  TimbrePreset,
+  TimbreType,
 } from '../../types';
 
 export const normalizeAngle = (angle: number) =>
   (((angle % 360) + 540) % 360) - 180;
 
-export function generatePresetTimbre(
-  type: Exclude<TimbrePreset, 'custom'>,
-  lambda?: number,
-  sigma?: number,
-  p?: number,
+export function getTimbrePreset(
+  type: Exclude<TimbreType, 'custom'>,
+  lambda: number = 0.5,
+  sigma: number = 0.8,
+  p: number = 1.5,
+  harmonics: number = 10,
 ): Timbre {
-  const harmonics = 10;
   const amplitudes: number[] = [];
 
   for (let n = 1; n <= harmonics; n++) {
@@ -26,38 +26,38 @@ export function generatePresetTimbre(
       case 'metallic':
         amp = 1 / n;
         break;
-      case 'normal':
-        amp = (1 / (n * n)) * Math.abs(Math.sin(n * Math.PI * (lambda ?? 0.5)));
-        break;
       case 'pure':
         amp = 1 / (n * n);
         break;
       case 'bright':
         amp = (1 / n) * Math.abs(Math.sin((n * Math.PI) / 2));
         break;
+      case 'normal':
+        amp = (1 / (n * n)) * Math.abs(Math.sin(n * Math.PI * lambda));
+        break;
       case 'soft':
-        amp = Math.exp(-(sigma ?? 0.1) * n);
+        amp = Math.exp(-sigma * n);
         break;
       case 'realistic':
-        amp = (1 / Math.pow(n, p ?? 2)) * Math.exp(-(sigma ?? 0.1) * n);
+        amp = (1 / Math.pow(n, p)) * Math.exp(-sigma * n);
         break;
     }
     amplitudes.push(amp);
   }
 
-  const maxAmp = Math.max(...amplitudes, 1);
+  const maxAmp = Math.max(...amplitudes);
   const normalized = amplitudes.map((a) => a / maxAmp);
   return { type, amplitudes: normalized };
 }
 
-export function computeTransferFunction(
-  type: TransferFunctionPreset,
+export function getTransferFunctionPreset(
+  type: TransferFunctionType,
   tau: number,
   alpha: number,
   fc: number,
   baseFreq: number,
   harmonics: number = 10,
-): { magnitudes: number[]; phases: number[] } {
+): TransferFunction {
   const magnitudes: number[] = [];
   const phases: number[] = [];
   const tau_s = tau / 1000;
@@ -119,22 +119,6 @@ export function computeTransferFunction(
     phases.push(phaseDeg);
   }
 
-  return { magnitudes, phases };
-}
-
-export function generatePresetTransferFunction(
-  type: TransferFunctionPreset,
-  tau: number = 0,
-  alpha: number = 0,
-  fc: number = 2000,
-): TransferFunction {
-  const { magnitudes, phases } = computeTransferFunction(
-    type,
-    tau,
-    alpha,
-    fc,
-    440,
-  );
   return {
     type,
     tau,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import type { TimbrePreset } from '../types';
-import { generatePresetTimbre } from '../services/audio/AudioPresets';
+import type { TimbreType } from '../types';
+import { getTimbrePreset } from '../services/audio/AudioPresets';
 import { AudioEngine } from '../services/audio/AudioEngine';
 
 interface TimbreAdjusterProps {
@@ -8,76 +8,41 @@ interface TimbreAdjusterProps {
 }
 
 const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
-  const [selectedPreset, setSelectedPreset] =
-    useState<TimbrePreset>('ethereal');
+  const [selectedPreset, setSelectedPreset] = useState<TimbreType>('ethereal');
   const [lambda, setLambda] = useState(0.5);
   const [sigma, setSigma] = useState(0.8);
   const [p, setP] = useState(1.5);
   const [amplitudes, setAmplitudes] = useState<number[]>(
-    () => generatePresetTimbre('ethereal').amplitudes,
+    () => getTimbrePreset('ethereal').amplitudes,
   );
 
   useEffect(() => {
     audioEngine.setTimbre({
-      type: 'ethereal',
+      type: selectedPreset,
       amplitudes,
     });
   }, [selectedPreset, amplitudes, audioEngine]);
 
-  const handlePresetChange = (preset: TimbrePreset) => {
+  const handlePresetChange = (preset: TimbreType) => {
     setSelectedPreset(preset);
     if (preset !== 'custom') {
-      let presetTimbre;
-      switch (preset) {
-        case 'normal':
-          presetTimbre = generatePresetTimbre(preset, lambda);
-          break;
-        case 'soft':
-          presetTimbre = generatePresetTimbre(preset, undefined, sigma);
-          break;
-        case 'realistic':
-          presetTimbre = generatePresetTimbre(preset, undefined, sigma, p);
-          break;
-        default:
-          presetTimbre = generatePresetTimbre(preset);
-          break;
-      }
-      setAmplitudes(presetTimbre.amplitudes);
+      setAmplitudes(getTimbrePreset(preset, lambda, sigma, p).amplitudes);
     }
   };
 
-  const handleLambdaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setLambda(value);
-    if (selectedPreset === 'normal') {
-      const presetTimbre = generatePresetTimbre('normal', value);
-      setAmplitudes(presetTimbre.amplitudes);
-    }
-  };
-
-  const handleSigmaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setSigma(value);
-    if (selectedPreset === 'soft' || selectedPreset === 'realistic') {
-      const presetTimbre =
-        selectedPreset === 'soft'
-          ? generatePresetTimbre('soft', undefined, value)
-          : generatePresetTimbre('realistic', undefined, value, p);
-      setAmplitudes(presetTimbre.amplitudes);
-    }
-  };
-
-  const handlePChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setP(value);
-    if (selectedPreset === 'realistic') {
-      const presetTimbre = generatePresetTimbre(
-        'realistic',
-        undefined,
-        sigma,
-        value,
+  const handleParamsChange = (update: {
+    lambda?: number;
+    sigma?: number;
+    p?: number;
+  }) => {
+    if (selectedPreset !== 'custom') {
+      setAmplitudes(
+        getTimbrePreset(selectedPreset, update.lambda, update.sigma, update.p)
+          .amplitudes,
       );
-      setAmplitudes(presetTimbre.amplitudes);
+      if (update.lambda) setLambda(update.lambda);
+      if (update.sigma) setSigma(update.sigma);
+      if (update.p) setP(update.p);
     }
   };
 
@@ -90,11 +55,14 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
     });
   };
 
-  const harmonicLabels = Array.from({ length: 10 }, (_, index) => (
-    <span>
-      f<sub>{index + 1}</sub>
-    </span>
-  ));
+  const harmonicLabels = Array.from(
+    { length: amplitudes.length },
+    (_, index) => (
+      <span>
+        f<sub>{index + 1}</sub>
+      </span>
+    ),
+  );
 
   return (
     <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
@@ -102,7 +70,7 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
         <select
           value={selectedPreset}
           onChange={(e) => {
-            handlePresetChange(e.target.value as TimbrePreset);
+            handlePresetChange(e.target.value as TimbreType);
           }}
           className="
               w-full rounded-2xl border border-slate-700 px-3 py-2
@@ -133,7 +101,9 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
             max="1"
             step="0.01"
             value={lambda}
-            onChange={handleLambdaChange}
+            onChange={(e) =>
+              handleParamsChange({ lambda: parseFloat(e.target.value) })
+            }
             className="w-full accent-indigo-400"
           />
         </div>
@@ -151,7 +121,9 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
             max="1"
             step="0.01"
             value={sigma}
-            onChange={handleSigmaChange}
+            onChange={(e) =>
+              handleParamsChange({ sigma: parseFloat(e.target.value) })
+            }
             className="w-full accent-indigo-400"
           />
         </div>
@@ -169,7 +141,9 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
             max="4"
             step="0.1"
             value={p}
-            onChange={handlePChange}
+            onChange={(e) =>
+              handleParamsChange({ p: parseFloat(e.target.value) })
+            }
             className="w-full accent-indigo-400"
           />
         </div>

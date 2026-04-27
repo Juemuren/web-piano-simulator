@@ -1,15 +1,16 @@
 import type { TransferFunction, Timbre } from '../../types';
-import {
-  computeTransferFunction,
-  generatePresetTimbre,
-  generatePresetTransferFunction,
-} from './AudioPresets';
+import { getTimbrePreset, getTransferFunctionPreset } from './AudioPresets';
 
 export class AudioEngine {
   private audioContext: AudioContext | null = null;
-  private currentTimbre: Timbre = generatePresetTimbre('ethereal', 0.5);
-  private currentTransferFunction: TransferFunction =
-    generatePresetTransferFunction('delay', 0, 0, 2000);
+  private timbre: Timbre = getTimbrePreset('ethereal', 0.5);
+  private transferFunction: TransferFunction = getTransferFunctionPreset(
+    'delay',
+    0,
+    0,
+    2000,
+    440,
+  );
 
   private oscillatorType: OscillatorType = 'sine';
   private volumeRatio: number = 0.2;
@@ -26,19 +27,19 @@ export class AudioEngine {
   }
 
   setTimbre(timbre: Timbre) {
-    this.currentTimbre = timbre;
+    this.timbre = timbre;
   }
 
   getTimbre(): Timbre {
-    return this.currentTimbre;
+    return this.timbre;
   }
 
   setTransferFunction(tf: TransferFunction) {
-    this.currentTransferFunction = tf;
+    this.transferFunction = tf;
   }
 
   getTransferFunction(): TransferFunction {
-    return this.currentTransferFunction;
+    return this.transferFunction;
   }
 
   getOscillatorType(): OscillatorType {
@@ -134,9 +135,9 @@ export class AudioEngine {
     if (!this.audioContext) return;
 
     const baseFreq = this.getBaseFreq(pitch, cents);
-    const harmonics = this.currentTimbre.amplitudes.length;
-    const transferFunction = this.currentTransferFunction;
-    const { magnitudes, phases } = computeTransferFunction(
+    const harmonics = this.timbre.amplitudes.length;
+    const transferFunction = this.transferFunction;
+    const { magnitudes, phases } = getTransferFunctionPreset(
       transferFunction.type,
       transferFunction.tau,
       transferFunction.alpha,
@@ -148,7 +149,7 @@ export class AudioEngine {
     for (let n = 1; n <= harmonics; n++) {
       const freq = baseFreq * n;
 
-      const timbreAmp = this.currentTimbre.amplitudes[n - 1] || 0;
+      const timbreAmp = this.timbre.amplitudes[n - 1] || 0;
       const transferMag = magnitudes[n - 1] || 0;
       const targetGain = this.getTargetGain(timbreAmp, transferMag, volume);
 

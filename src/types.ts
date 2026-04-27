@@ -1,4 +1,4 @@
-export type TimbrePreset =
+export type TimbreType =
   | 'ethereal'
   | 'metallic'
   | 'pure'
@@ -9,11 +9,11 @@ export type TimbrePreset =
   | 'custom';
 
 export interface Timbre {
-  type: TimbrePreset;
+  type: TimbreType;
   amplitudes: number[];
 }
 
-export type TransferFunctionPreset =
+export type TransferFunctionType =
   | 'delay'
   | 'single_echo'
   | 'multi_echo'
@@ -22,7 +22,7 @@ export type TransferFunctionPreset =
   | 'allpass';
 
 export interface TransferFunction {
-  type: TransferFunctionPreset;
+  type: TransferFunctionType;
   tau: number;
   alpha: number;
   fc: number;
