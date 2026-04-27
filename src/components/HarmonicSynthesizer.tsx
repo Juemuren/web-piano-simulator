@@ -13,7 +13,7 @@ const HarmonicSynthesizer: React.FC<HarmonicSynthesizerProps> = ({
   );
   const [volume, setVolume] = useState(audioEngine.getVolume());
   const [attackTime, setAttackTime] = useState(audioEngine.getAttackTime());
-  const [decayTime, setDelayTime] = useState(audioEngine.getDelayTime());
+  const [decayTime, setDecayTime] = useState(audioEngine.getDecayTime());
   const [releaseTime, setReleaseTime] = useState(audioEngine.getReleaseTime());
   const [sustainGain, setSustainGain] = useState(audioEngine.getSustainGain());
   const [silenceGain, setSilenceGain] = useState(audioEngine.getSilenceGain());
@@ -31,7 +31,7 @@ const HarmonicSynthesizer: React.FC<HarmonicSynthesizerProps> = ({
   }, [attackTime, audioEngine]);
 
   useEffect(() => {
-    audioEngine.setDelayTime(decayTime);
+    audioEngine.setDecayTime(decayTime);
   }, [decayTime, audioEngine]);
 
   useEffect(() => {
@@ -112,7 +112,7 @@ const HarmonicSynthesizer: React.FC<HarmonicSynthesizerProps> = ({
           max="1"
           step="0.01"
           value={decayTime}
-          onChange={(e) => setDelayTime(parseFloat(e.target.value))}
+          onChange={(e) => setDecayTime(parseFloat(e.target.value))}
           className="w-full accent-indigo-400"
         />
       </div>

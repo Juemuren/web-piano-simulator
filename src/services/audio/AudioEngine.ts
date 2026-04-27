@@ -10,8 +10,6 @@ export class AudioEngine {
   private currentTimbre: Timbre = generatePresetTimbre('ethereal', 0.5);
   private currentTransferFunction: TransferFunction =
     generatePresetTransferFunction('delay', 0, 0, 2000);
-  private activeOscillators: OscillatorNode[] = [];
-  private activeGains: GainNode[] = [];
 
   private oscillatorType: OscillatorType = 'sine';
   private volumeRatio: number = 0.2;
@@ -31,7 +29,7 @@ export class AudioEngine {
     this.currentTimbre = timbre;
   }
 
-  getCurrentTimbre(): Timbre {
+  getTimbre(): Timbre {
     return this.currentTimbre;
   }
 
@@ -39,7 +37,7 @@ export class AudioEngine {
     this.currentTransferFunction = tf;
   }
 
-  getCurrentTransferFunction(): TransferFunction {
+  getTransferFunction(): TransferFunction {
     return this.currentTransferFunction;
   }
 
@@ -67,11 +65,11 @@ export class AudioEngine {
     this.attackTime = value;
   }
 
-  getDelayTime(): number {
+  getDecayTime(): number {
     return this.decayTime;
   }
 
-  setDelayTime(value: number) {
+  setDecayTime(value: number) {
     this.decayTime = value;
   }
 
@@ -114,28 +112,28 @@ export class AudioEngine {
     }
   }
 
-  getBaseFreq(pitch: number) {
-    return 440 * Math.pow(2, (pitch - 69) / 12);
+  getBaseFreq(pitch: number, cents: number) {
+    return 440 * Math.pow(2, (pitch + cents / 100 - 69) / 12);
   }
 
   getTargetGain(timbreAmp: number, transferMag: number, volume: number) {
-    return timbreAmp * transferMag * this.volumeRatio * (volume / 127);
+    return timbreAmp * transferMag * (volume / 127) * this.volumeRatio;
   }
 
-  getDelaySecond(phaseDeg: number, freq: number) {
+  getDelaySeconds(phaseDeg: number, freq: number) {
     return phaseDeg / (360 * freq);
   }
 
   async playNote(
     pitch: number,
     duration: number,
-    volume: number,
+    volume: number = 100,
     cents: number = 0,
   ) {
     await this.ensureAudioContextRunning();
     if (!this.audioContext) return;
 
-    const baseFreq = this.getBaseFreq(pitch + cents / 100);
+    const baseFreq = this.getBaseFreq(pitch, cents);
     const harmonics = this.currentTimbre.amplitudes.length;
     const transferFunction = this.currentTransferFunction;
     const { magnitudes, phases } = computeTransferFunction(
@@ -144,25 +142,20 @@ export class AudioEngine {
       transferFunction.alpha,
       transferFunction.fc,
       baseFreq,
-      this.currentTimbre.amplitudes.length,
+      harmonics,
     );
 
     for (let n = 1; n <= harmonics; n++) {
-      const osc = this.audioContext.createOscillator();
-      const gain = this.audioContext.createGain();
-      const now = this.audioContext.currentTime;
-
       const freq = baseFreq * n;
-      osc.frequency.setValueAtTime(freq, now);
-      osc.type = this.oscillatorType;
 
       const timbreAmp = this.currentTimbre.amplitudes[n - 1] || 0;
       const transferMag = magnitudes[n - 1] || 0;
       const targetGain = this.getTargetGain(timbreAmp, transferMag, volume);
 
       const phaseDeg = phases[n - 1] || 0;
-      const delaySeconds = this.getDelaySecond(phaseDeg, freq);
+      const delaySeconds = this.getDelaySeconds(phaseDeg, freq);
 
+      const now = this.audioContext.currentTime;
       const startTime = Math.max(0, now + delaySeconds);
       const attackEnd = startTime + this.attackTime;
       const decayEnd = attackEnd + this.decayTime / Math.sqrt(n);
@@ -179,29 +172,28 @@ export class AudioEngine {
         this.silenceGain,
       );
 
-      gain.gain.setValueAtTime(this.silenceGain, startTime);
-      gain.gain.exponentialRampToValueAtTime(attackGain, attackEnd);
-      gain.gain.exponentialRampToValueAtTime(decayGain, decayEnd);
-      gain.gain.exponentialRampToValueAtTime(sustainGain, sustainEnd);
-      gain.gain.exponentialRampToValueAtTime(this.silenceGain, stopTime);
+      const oscillatorNode = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
 
-      osc.connect(gain);
-      gain.connect(this.audioContext.destination);
+      oscillatorNode.type = this.oscillatorType;
+      oscillatorNode.frequency.setValueAtTime(freq, now);
 
-      this.activeOscillators.push(osc);
-      this.activeGains.push(gain);
+      gainNode.gain.setValueAtTime(this.silenceGain, startTime);
+      gainNode.gain.exponentialRampToValueAtTime(attackGain, attackEnd);
+      gainNode.gain.exponentialRampToValueAtTime(decayGain, decayEnd);
+      gainNode.gain.exponentialRampToValueAtTime(sustainGain, sustainEnd);
+      gainNode.gain.exponentialRampToValueAtTime(this.silenceGain, stopTime);
 
-      osc.onended = () => {
-        this.activeOscillators = this.activeOscillators.filter(
-          (active) => active !== osc,
-        );
-        this.activeGains = this.activeGains.filter((active) => active !== gain);
-        osc.disconnect();
-        gain.disconnect();
+      oscillatorNode.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+
+      oscillatorNode.onended = () => {
+        oscillatorNode.disconnect();
+        gainNode.disconnect();
       };
 
-      osc.start(startTime);
-      osc.stop(stopTime);
+      oscillatorNode.start(startTime);
+      oscillatorNode.stop(stopTime);
     }
   }
 }
