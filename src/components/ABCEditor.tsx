@@ -6,9 +6,9 @@ import {
   renderAbc,
   TimingCallbacks,
 } from 'abcjs';
+import { ABCPresets, getAbcPreset } from '../services/abc/ABCPresets';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
-import { ABCPresets } from '../services/abc/ABCPresets';
 
 interface ABCNotationPlayerProps {
   audioEngine: AudioEngine;
@@ -34,7 +34,6 @@ export default function ABCNotationPlayer({
   const [abcPlayer] = useState(
     () => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd),
   );
-  const [abcPersets] = useState(() => new ABCPresets());
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasNotes, setHasNotes] = useState(false);
   const [selectedPresetIndex, setSelectedPresetIndex] = useState<number>(-1);
@@ -162,7 +161,7 @@ export default function ABCNotationPlayer({
               const index = parseInt(e.target.value);
               setSelectedPresetIndex(index);
               if (index >= 0) {
-                const content = await abcPersets.getPreset(index);
+                const content = await getAbcPreset(index);
                 setAbcContent(content);
                 if (isPlaying) handleStop();
               } else {
@@ -177,7 +176,7 @@ export default function ABCNotationPlayer({
               "
           >
             <option value={-1}>自定义</option>
-            {abcPersets.names.map((name, index) => (
+            {ABCPresets.map((name, index) => (
               <option key={index} value={index}>
                 {name}
               </option>
