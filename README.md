@@ -106,14 +106,16 @@ $$p(t) = \sum_{n=1}^{N}A_n\sin(2\pi n f_1 t)$$
 | 单回声 | $\sqrt{1 + \alpha^2 + 2\alpha\cos(2\pi\tau f)}$         | $-\arctan(\frac{\alpha\sin(2\pi\tau f)}{1 + \alpha\cos(2\pi\tau f)})$               |
 | 多回声 | $\frac1{\sqrt{1 + \alpha^2 - 2\alpha\cos(2\pi\tau f)}}$ | $-\arctan(\frac{\alpha\sin(2\pi\tau f)}{1 - \alpha\cos(2\pi\tau f)})$               |
 | 全通   | $1$                                                     | $-2\pi\tau f - 2\arctan(\frac{\alpha\sin(2\pi\tau f)}{1 - \alpha\cos(2\pi\tau f)})$ |
-| 低通   | $\mathbf{1}_{f \le f_c}$                                | $0$                                                                                 |
-| 高通   | $\mathbf{1}_{f \ge f_c}$                                | $0$                                                                                 |
+| 低通   | $`\mathbf{1}_{f \le f_{\max}}`$                         | $0$                                                                                 |
+| 高通   | $`\mathbf{1}_{f \ge f_{\min}}`$                         | $0$                                                                                 |
+| 带通   | $`\mathbf{1}_{f \le f_{\max} \land f \ge f_{\min}}`$    | $0$                                                                                 |
 
 其中可调节的参数有
 
 - $\tau$ 延迟时间
 - $\alpha$ 衰减系数
-- $f_c$ 频率阈值
+- $f_{\min}$ 最小频率
+- $f_{\max}$ 最大频率
 
 ### 乐谱
 
