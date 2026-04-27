@@ -8,7 +8,8 @@ export class AudioEngine {
     'delay',
     0,
     0,
-    2000,
+    20,
+    20000,
     440,
   );
 
@@ -141,7 +142,8 @@ export class AudioEngine {
       transferFunction.type,
       transferFunction.tau,
       transferFunction.alpha,
-      transferFunction.fc,
+      transferFunction.minFreq,
+      transferFunction.maxFreq,
       baseFreq,
       harmonics,
     );

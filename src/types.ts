@@ -17,15 +17,17 @@ export type TransferFunctionType =
   | 'delay'
   | 'single_echo'
   | 'multi_echo'
-  | 'lowpass'
-  | 'highpass'
-  | 'allpass';
+  | 'low_pass'
+  | 'high_pass'
+  | 'all_pass'
+  | 'band_pass';
 
 export interface TransferFunction {
   type: TransferFunctionType;
   tau: number;
   alpha: number;
-  fc: number;
+  minFreq: number;
+  maxFreq: number;
   magnitudes: number[];
   phases: number[];
 }

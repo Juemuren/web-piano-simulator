@@ -12,7 +12,7 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
 }) => {
   const [baseFreq, setBaseFreq] = useState<number>(440);
   const [transferFunction, setTransferFunction] = useState<TransferFunction>(
-    () => getTransferFunctionPreset('delay', 0, 0.1, 2000, 440),
+    () => getTransferFunctionPreset('delay', 0, 0.1, 20, 20000, 440),
   );
 
   useEffect(() => {
@@ -25,7 +25,8 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
         preset,
         prev.tau,
         prev.alpha,
-        prev.fc,
+        prev.minFreq,
+        prev.maxFreq,
         baseFreq,
       ),
     );
@@ -34,7 +35,8 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
   const handleParamsChange = (updates: {
     tau?: number;
     alpha?: number;
-    fc?: number;
+    minFreq?: number;
+    maxFreq?: number;
     baseFreq?: number;
   }) => {
     setTransferFunction((prev) =>
@@ -42,7 +44,8 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
         prev.type,
         updates.tau ?? prev.tau,
         updates.alpha ?? prev.alpha,
-        updates.fc ?? prev.fc,
+        updates.minFreq ?? prev.minFreq,
+        updates.maxFreq ?? prev.maxFreq,
         updates.baseFreq ?? baseFreq,
       ),
     );
@@ -76,9 +79,10 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
             <option value="delay">纯延时</option>
             <option value="single_echo">单回声</option>
             <option value="multi_echo">多回声</option>
-            <option value="lowpass">低通</option>
-            <option value="highpass">高通</option>
-            <option value="allpass">全通</option>
+            <option value="low_pass">低通</option>
+            <option value="high_pass">高通</option>
+            <option value="band_pass">带通</option>
+            <option value="all_pass">全通</option>
           </select>
         </div>
       </div>
@@ -104,7 +108,7 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
       {(transferFunction.type === 'delay' ||
         transferFunction.type === 'single_echo' ||
         transferFunction.type === 'multi_echo' ||
-        transferFunction.type === 'allpass') && (
+        transferFunction.type === 'all_pass') && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span>延迟时间</span>
@@ -128,7 +132,7 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
 
       {(transferFunction.type === 'single_echo' ||
         transferFunction.type === 'multi_echo' ||
-        transferFunction.type === 'allpass') && (
+        transferFunction.type === 'all_pass') && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span>衰减系数</span>
@@ -150,21 +154,42 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
         </div>
       )}
 
-      {(transferFunction.type === 'lowpass' ||
-        transferFunction.type === 'highpass') && (
+      {(transferFunction.type === 'low_pass' ||
+        transferFunction.type === 'band_pass') && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span>频率阈值</span>
-            <span className="font-semibold">{transferFunction.fc} Hz</span>
+            <span>最小频率</span>
+            <span className="font-semibold">{transferFunction.minFreq} Hz</span>
           </div>
           <input
             type="range"
             min="20"
             max="20000"
             step="10"
-            value={transferFunction.fc}
+            value={transferFunction.minFreq}
             onChange={(e) =>
-              handleParamsChange({ fc: parseFloat(e.target.value) })
+              handleParamsChange({ minFreq: parseFloat(e.target.value) })
+            }
+            className="w-full accent-indigo-400"
+          />
+        </div>
+      )}
+
+      {(transferFunction.type === 'high_pass' ||
+        transferFunction.type === 'band_pass') && (
+        <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span>最大频率</span>
+            <span className="font-semibold">{transferFunction.maxFreq} Hz</span>
+          </div>
+          <input
+            type="range"
+            min="20"
+            max="20000"
+            step="10"
+            value={transferFunction.maxFreq}
+            onChange={(e) =>
+              handleParamsChange({ maxFreq: parseFloat(e.target.value) })
             }
             className="w-full accent-indigo-400"
           />

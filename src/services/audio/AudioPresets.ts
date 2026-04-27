@@ -5,8 +5,17 @@ import type {
   TimbreType,
 } from '../../types';
 
-export const normalizeAngle = (angle: number) =>
-  (((angle % 360) + 540) % 360) - 180;
+function delayToArg(delay: number, freq: number) {
+  return -2 * Math.PI * delay * freq;
+}
+
+function radToDeg(rad: number) {
+  return (rad * 180) / Math.PI;
+}
+
+function normalizeDeg(angle: number) {
+  return (((angle % 360) + 540) % 360) - 180;
+}
 
 export function getTimbrePreset(
   type: Exclude<TimbreType, 'custom'>,
@@ -54,13 +63,14 @@ export function getTransferFunctionPreset(
   type: TransferFunctionType,
   tau: number,
   alpha: number,
-  fc: number,
+  minFreq: number,
+  maxFreq: number,
   baseFreq: number,
   harmonics: number = 10,
 ): TransferFunction {
   const magnitudes: number[] = [];
   const phases: number[] = [];
-  const tau_s = tau / 1000;
+  const delay = tau / 1000;
 
   for (let n = 1; n <= harmonics; n++) {
     const freq = baseFreq * n;
@@ -70,47 +80,51 @@ export function getTransferFunctionPreset(
     switch (type) {
       case 'delay': {
         mag = 1;
-        phaseDeg = normalizeAngle(-360 * tau_s * freq);
+        const arg = delayToArg(delay, freq);
+        phaseDeg = normalizeDeg(radToDeg(arg));
         break;
       }
       case 'single_echo': {
-        const arg = 2 * Math.PI * tau_s * freq;
+        const arg = delayToArg(delay, freq);
         const cosArg = Math.cos(arg);
         const sinArg = Math.sin(arg);
         mag = Math.sqrt(1 + alpha * alpha + 2 * alpha * cosArg);
-        phaseDeg =
-          (-Math.atan2(alpha * sinArg, 1 + alpha * cosArg) * 180) / Math.PI;
+        const phaseRad = Math.atan2(alpha * sinArg, 1 + alpha * cosArg);
+        phaseDeg = radToDeg(phaseRad);
         break;
       }
       case 'multi_echo': {
-        const arg2 = 2 * Math.PI * tau_s * freq;
-        const cosArg2 = Math.cos(arg2);
-        const sinArg2 = Math.sin(arg2);
-        mag = 1 / Math.sqrt(1 + alpha * alpha - 2 * alpha * cosArg2);
-        phaseDeg =
-          (-Math.atan2(alpha * sinArg2, 1 - alpha * cosArg2) * 180) / Math.PI;
+        const arg = delayToArg(delay, freq);
+        const cosArg = Math.cos(arg);
+        const sinArg = Math.sin(arg);
+        mag = 1 / Math.sqrt(1 + alpha * alpha - 2 * alpha * cosArg);
+        const phaseRad = Math.atan2(alpha * sinArg, 1 - alpha * cosArg);
+        phaseDeg = radToDeg(phaseRad);
         break;
       }
-      case 'lowpass': {
-        mag = freq <= fc ? 1 : 0;
+      case 'low_pass': {
+        mag = freq <= maxFreq ? 1 : 0;
         phaseDeg = 0;
         break;
       }
-      case 'highpass': {
-        mag = freq >= fc ? 1 : 0;
+      case 'high_pass': {
+        mag = freq >= minFreq ? 1 : 0;
         phaseDeg = 0;
         break;
       }
-      case 'allpass': {
-        const arg3 = 2 * Math.PI * tau_s * freq;
-        const cosArg3 = Math.cos(arg3);
-        const sinArg3 = Math.sin(arg3);
+      case 'band_pass': {
+        mag = freq >= minFreq && freq <= maxFreq ? 1 : 0;
+        phaseDeg = 0;
+        break;
+      }
+      case 'all_pass': {
+        const arg = delayToArg(delay, freq);
+        const cosArg = Math.cos(arg);
+        const sinArg = Math.sin(arg);
         mag = 1;
-        phaseDeg = normalizeAngle(
-          -360 * tau_s * freq -
-            (2 * Math.atan2(alpha * sinArg3, 1 - alpha * cosArg3) * 180) /
-              Math.PI,
-        );
+        const phaseRad =
+          arg + 2 * Math.atan2(alpha * sinArg, 1 - alpha * cosArg);
+        phaseDeg = normalizeDeg(radToDeg(phaseRad));
         break;
       }
     }
@@ -123,7 +137,8 @@ export function getTransferFunctionPreset(
     type,
     tau,
     alpha,
-    fc,
+    minFreq,
+    maxFreq,
     magnitudes,
     phases,
   };
