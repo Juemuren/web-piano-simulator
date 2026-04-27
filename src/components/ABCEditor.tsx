@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   type AbcElem,
   type NoteTimingEvent,
@@ -9,6 +9,8 @@ import {
 import { ABCPresets, getAbcPreset } from '../services/abc/ABCPresets';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
+import ControlPanel from './shared/ControlPanel';
+import ControlSelect from './shared/ControlSelect';
 
 interface ABCNotationPlayerProps {
   audioEngine: AudioEngine;
@@ -152,66 +154,59 @@ export default function ABCNotationPlayer({
   }, [abcContent, abcPlayer, handleStop, handlePlay]);
 
   return (
-    <div className="w-full max-w-4xl">
-      <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
-        <div className="flex flex-col mb-3 gap-3">
-          <select
-            value={selectedPresetIndex}
-            onChange={async (e) => {
-              const index = parseInt(e.target.value);
-              setSelectedPresetIndex(index);
-              if (index >= 0) {
-                const content = await getAbcPreset(index);
-                setAbcContent(content);
-                if (isPlaying) handleStop();
-              } else {
-                setAbcContent('');
-              }
+    <ControlPanel>
+      <div className="flex flex-col mb-3 gap-3">
+        <ControlSelect
+          value={selectedPresetIndex}
+          onChange={async (e) => {
+            const index = parseInt(e.target.value);
+            setSelectedPresetIndex(index);
+            if (index >= 0) {
+              const content = await getAbcPreset(index);
+              setAbcContent(content);
               if (isPlaying) handleStop();
-            }}
-            className="
-                w-full rounded-2xl border border-slate-700 px-3 py-2
-                focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25
-                dark:bg-slate-800/70 dark:text-slate-100
-              "
-          >
-            <option value={-1}>自定义</option>
-            {ABCPresets.map((name, index) => (
-              <option key={index} value={index}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <textarea
-          id="abc-input"
-          value={abcContent}
-          onChange={(e) => {
-            setAbcContent(e.target.value);
-            setSelectedPresetIndex(-1);
+            } else {
+              setAbcContent('');
+            }
             if (isPlaying) handleStop();
           }}
-          placeholder="输入乐谱或选择预设"
-          className="w-full h-48 p-3 mb-4 border text-sm border-slate-700 bg-slate-100 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
-        />
-
-        <div className="flex justify-center">
-          {hasNotes && (
-            <button
-              onClick={isPlaying ? handleStop : handlePlay}
-              className={`px-4 py-2 text-white rounded-2xl transition-colors ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
-            >
-              {isPlaying ? '停止播放' : '开始播放'}
-            </button>
-          )}
-        </div>
-
-        <div
-          id="abcjs-paper"
-          className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
-        />
+        >
+          <option value={-1}>自定义</option>
+          {ABCPresets.map((name, index) => (
+            <option key={index} value={index}>
+              {name}
+            </option>
+          ))}
+        </ControlSelect>
       </div>
-    </div>
+
+      <textarea
+        id="abc-input"
+        value={abcContent}
+        onChange={(e) => {
+          setAbcContent(e.target.value);
+          setSelectedPresetIndex(-1);
+          if (isPlaying) handleStop();
+        }}
+        placeholder="输入乐谱或选择预设"
+        className="w-full h-48 p-3 mb-4 border text-sm border-slate-700 bg-slate-100 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+      />
+
+      <div className="flex justify-center">
+        {hasNotes && (
+          <button
+            onClick={isPlaying ? handleStop : handlePlay}
+            className={`px-4 py-2 text-white rounded-2xl transition-colors ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+          >
+            {isPlaying ? '停止播放' : '开始播放'}
+          </button>
+        )}
+      </div>
+
+      <div
+        id="abcjs-paper"
+        className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
+      />
+    </ControlPanel>
   );
 }
