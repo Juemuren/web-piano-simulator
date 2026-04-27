@@ -34,6 +34,7 @@ export default function ABCNotationPlayer({
   const [abcPlayer] = useState(
     () => new ABCPlayer(audioEngine, onNoteStart, onNoteEnd),
   );
+  const [abcPersets] = useState(() => new ABCPresets());
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasNotes, setHasNotes] = useState(false);
   const [selectedPresetIndex, setSelectedPresetIndex] = useState<number>(-1);
@@ -161,9 +162,7 @@ export default function ABCNotationPlayer({
               const index = parseInt(e.target.value);
               setSelectedPresetIndex(index);
               if (index >= 0) {
-                const preset = ABCPresets[index];
-                const response = await fetch(preset.path);
-                const content = await response.text();
+                const content = await abcPersets.getPreset(index);
                 setAbcContent(content);
                 if (isPlaying) handleStop();
               } else {
@@ -178,9 +177,9 @@ export default function ABCNotationPlayer({
               "
           >
             <option value={-1}>自定义</option>
-            {ABCPresets.map((preset, index) => (
+            {abcPersets.names.map((name, index) => (
               <option key={index} value={index}>
-                {preset.name}
+                {name}
               </option>
             ))}
           </select>

@@ -1,8 +1,12 @@
-import presetsData from './ABCPresets.json';
+import presetsNames from './ABCPresets.json';
 
-export interface ABCPreset {
-  name: string;
-  path: string;
+export class ABCPresets {
+  public names: string[] = presetsNames;
+
+  async getPreset(index: number) {
+    const name = this.names[index];
+    const path = `presets/${name}.abc`;
+    const response = await fetch(path);
+    return await response.text();
+  }
 }
-
-export const ABCPresets = presetsData as ABCPreset[];
