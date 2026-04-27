@@ -101,7 +101,12 @@ const Piano: React.FC<PianoProps> = ({
   }
 
   return (
-    <div className="w-full py-4">
+    <div
+      className="
+        w-full py-4 rounded-lg shadow-md
+        ring-1 ring-slate-200 dark:ring-slate-800
+      "
+    >
       <div className="relative inline-block" style={{ height: whiteKeyHeight }}>
         <div className="flex">
           {whiteKeys.map((key) => {
@@ -116,11 +121,12 @@ const Piano: React.FC<PianoProps> = ({
                 onTouchStart={(e) => handleKeyDown(e, key.note)}
                 onTouchEnd={(e) => handleKeyUp(e, key.note)}
                 onTouchCancel={(e) => handleKeyUp(e, key.note)}
-                className={`text-xs border border-gray-400 transition-all duration-100 ${
-                  isPressed
-                    ? 'bg-blue-200 text-black shadow-inner'
-                    : 'bg-white text-black'
-                }`}
+                className={`
+                  text-xs border border-gray-400 transition-all duration-100 ${
+                    isPressed
+                      ? 'bg-blue-200 text-black shadow-inner'
+                      : 'bg-white text-black'
+                  }`}
                 style={{
                   width: whiteKeyWidth,
                   height: whiteKeyHeight,
@@ -151,11 +157,12 @@ const Piano: React.FC<PianoProps> = ({
                 onTouchStart={(e) => handleKeyDown(e, key.note)}
                 onTouchEnd={(e) => handleKeyUp(e, key.note)}
                 onTouchCancel={(e) => handleKeyUp(e, key.note)}
-                className={`text-xs border border-gray-600 transition-all duration-100 ${
-                  isPressed
-                    ? 'bg-blue-800 text-white shadow-inner'
-                    : 'bg-black text-white'
-                }`}
+                className={`
+                  text-xs border border-gray-600 transition-all duration-100 ${
+                    isPressed
+                      ? 'bg-blue-800 text-white shadow-inner'
+                      : 'bg-black text-white'
+                  }`}
                 style={{
                   width: blackKeyWidth,
                   height: blackKeyHeight,

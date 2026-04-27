@@ -34,49 +34,49 @@ function App() {
 
   return (
     <>
-      <section className="min-h-screen grow bg-slate-50 px-4 py-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8 xl:px-10">
-        <div className="mx-auto flex w-full flex-col justify-center gap-5">
-          <div className="mx-auto w-full max-w-4xl text-center xl:max-w-5xl">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              钢琴模拟器
-            </h1>
-            <p className="mt-2 text-base text-slate-500 dark:text-slate-400 sm:text-lg">
-              点击琴键演奏音符
-            </p>
-          </div>
+      <section
+        className="
+          w-full mx-auto min-h-screen grow px-3
+          flex flex-col justify-center gap-5
+          bg-slate-50 dark:bg-slate-950
+          text-slate-900 dark:text-slate-100
+        "
+      >
+        <h1 className="text-3xl font-bold text-center">钢琴模拟器</h1>
 
-          <div className="flex w-full flex-col items-center gap-4 xl:flex-row xl:items-start xl:justify-center">
-            <div className="w-full max-w-4xl xl:max-w-md xl:flex-1">
-              <CollapsibleSection title="谐波合成器">
-                <HarmonicSynthesizer audioEngine={audioEngine} />
-              </CollapsibleSection>
-            </div>
-            <div className="w-full max-w-4xl xl:max-w-md xl:flex-1">
-              <CollapsibleSection title="音色调节器">
-                <TimbreAdjuster audioEngine={audioEngine} />
-              </CollapsibleSection>
-            </div>
-            <div className="w-full max-w-4xl xl:max-w-md xl:flex-1">
-              <CollapsibleSection title="传递函数修改器">
-                <TransferFunctionModifier audioEngine={audioEngine} />
-              </CollapsibleSection>
-            </div>
-          </div>
-          <div className="mx-auto w-full max-w-4xl">
-            <CollapsibleSection title="乐谱编辑器">
-              <ABCEditor
-                audioEngine={audioEngine}
-                onNoteStart={handleNoteStart}
-                onNoteEnd={handleNoteEnd}
-                onStop={handleStopPlayingNotes}
-              />
+        <div
+          className="
+          flex flex-col items-center gap-4
+          xl:flex-row xl:items-start xl:justify-center"
+        >
+          <div className="w-full max-w-4xl">
+            <CollapsibleSection title="谐波合成器">
+              <HarmonicSynthesizer audioEngine={audioEngine} />
             </CollapsibleSection>
           </div>
-
-          <div className="w-full rounded-lg bg-white/80 shadow-md ring-1 ring-slate-200 dark:bg-slate-900/80 dark:ring-slate-800 sm:px-0 xl:px-6">
-            <Piano audioEngine={audioEngine} playingNotes={playingNotes} />
+          <div className="w-full max-w-4xl">
+            <CollapsibleSection title="音色调节器">
+              <TimbreAdjuster audioEngine={audioEngine} />
+            </CollapsibleSection>
+          </div>
+          <div className="w-full max-w-4xl">
+            <CollapsibleSection title="传递函数修改器">
+              <TransferFunctionModifier audioEngine={audioEngine} />
+            </CollapsibleSection>
           </div>
         </div>
+        <div className="mx-auto w-full max-w-4xl">
+          <CollapsibleSection title="乐谱编辑器">
+            <ABCEditor
+              audioEngine={audioEngine}
+              onNoteStart={handleNoteStart}
+              onNoteEnd={handleNoteEnd}
+              onStop={handleStopPlayingNotes}
+            />
+          </CollapsibleSection>
+        </div>
+
+        <Piano audioEngine={audioEngine} playingNotes={playingNotes} />
       </section>
       <Footer />
     </>

@@ -189,14 +189,22 @@ export default function ABCNotationPlayer({
           if (isPlaying) handleStop();
         }}
         placeholder="输入乐谱或选择预设"
-        className="w-full h-48 p-3 mb-4 border text-sm border-slate-700 bg-slate-100 dark:bg-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+        className="
+          w-full h-48 p-3 mb-4 text-sm resize-none
+          bg-gray-200 dark:bg-gray-800
+          border border-gray-200/80 dark:border-slate-800/20
+          focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+        "
       />
 
       <div className="flex justify-center">
         {hasNotes && (
           <button
             onClick={isPlaying ? handleStop : handlePlay}
-            className={`px-4 py-2 text-white rounded-2xl transition-colors ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+            className={`
+              w-full py-2 text-white rounded-2xl transition-colors
+              ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
+            `}
           >
             {isPlaying ? '停止播放' : '开始播放'}
           </button>
@@ -205,7 +213,11 @@ export default function ABCNotationPlayer({
 
       <div
         id="abcjs-paper"
-        className="mt-4 w-full overflow-x-auto rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-950/80"
+        className="
+          w-full mt-4 rounded-3xl shadow-sm
+          border border-slate-300/20 dark:border-slate-700/80
+          bg-white/90 dark:bg-black/10
+        "
       />
     </ControlPanel>
   );

@@ -15,7 +15,12 @@ function CollapsibleSection({ title, children }: CollapsibleSectionProps) {
       <button
         type="button"
         onClick={handleToggle}
-        className="w-full text-left p-3 bg-white dark:bg-slate-800 rounded-lg shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        className="
+          w-full text-center p-3 rounded-lg shadow-md
+          bg-slate-200 dark:bg-slate-800
+          hover:bg-slate-300 dark:hover:bg-slate-700
+          transition-colors
+        "
       >
         <h2 className="text-xl font-semibold">
           {title} {isExpanded ? '▼' : '▶'}

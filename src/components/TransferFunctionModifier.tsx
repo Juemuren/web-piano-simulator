@@ -93,7 +93,7 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
         step="1"
         value={baseFreq}
         displayValue={`${baseFreq} Hz`}
-        accentClassName="accent-blue-400"
+        accentClassName="accent-sky-500"
         onChange={(value) => handleParamsChange({ baseFreq: value })}
       />
 

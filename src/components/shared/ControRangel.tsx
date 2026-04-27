@@ -17,10 +17,10 @@ function ControlRange({
   step,
   onChange,
   displayValue = value.toString(),
-  accentClassName = 'accent-indigo-400',
+  accentClassName = 'accent-emerald-500',
 }: ControlRangeProps) {
   return (
-    <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
+    <div className="mb-4 pb-1 rounded-2xl border border-slate-500/25 p-4">
       <div className="mb-2 flex items-center justify-between text-sm">
         <span>{label}</span>
         <span className="font-semibold">{displayValue}</span>

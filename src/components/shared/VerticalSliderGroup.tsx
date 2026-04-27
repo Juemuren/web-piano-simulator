@@ -26,10 +26,7 @@ function VerticalSliderGroup({
   return (
     <div className="flex items-end gap-2 overflow-x-auto px-1 pb-3">
       {values.map((value, index) => (
-        <div
-          key={getKey(index)}
-          className="flex flex-1 flex-col items-center gap-3"
-        >
+        <div key={getKey(index)} className="flex flex-1 flex-col items-center">
           <div className="text-xs">{formatValue(value)}</div>
           <div className="relative flex h-36 w-8 items-center justify-center">
             <input
@@ -40,9 +37,11 @@ function VerticalSliderGroup({
               value={value}
               disabled={disabled}
               onChange={(e) => onChange?.(index, parseFloat(e.target.value))}
-              className={`h-3 w-36 -rotate-90 appearance-none rounded-full bg-slate-700/80 accent-indigo-400 ${
-                disabled ? 'cursor-not-allowed' : ''
-              }`}
+              className={`
+                h-2 -rotate-90 appearance-none rounded-full
+                bg-slate-500/50 accent-emerald-500
+                ${disabled ? 'cursor-not-allowed' : ''}
+              `}
             />
           </div>
           <div className="text-xs text-slate-400">{labels[index]}</div>
