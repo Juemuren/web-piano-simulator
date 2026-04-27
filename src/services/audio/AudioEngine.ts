@@ -14,7 +14,7 @@ export class AudioEngine {
   private activeGains: GainNode[] = [];
 
   private oscillatorType: OscillatorType = 'sine';
-  private volume: number = 0.2;
+  private volumeRatio: number = 0.2;
   private attackTime: number = 0.01;
   private decayTime: number = 0.4;
   private releaseTime: number = 0.3;
@@ -52,11 +52,11 @@ export class AudioEngine {
   }
 
   getVolume(): number {
-    return this.volume;
+    return this.volumeRatio;
   }
 
   setVolume(value: number) {
-    this.volume = value;
+    this.volumeRatio = value;
   }
 
   getAttackTime(): number {
@@ -114,8 +114,16 @@ export class AudioEngine {
     }
   }
 
-  getFrequency(pitch: number): number {
+  getBaseFreq(pitch: number) {
     return 440 * Math.pow(2, (pitch - 69) / 12);
+  }
+
+  getTargetGain(timbreAmp: number, transferMag: number, volume: number) {
+    return timbreAmp * transferMag * this.volumeRatio * (volume / 127);
+  }
+
+  getDelaySecond(phaseDeg: number, freq: number) {
+    return phaseDeg / (360 * freq);
   }
 
   async playNote(
@@ -127,7 +135,7 @@ export class AudioEngine {
     await this.ensureAudioContextRunning();
     if (!this.audioContext) return;
 
-    const baseFreq = this.getFrequency(pitch + cents / 100);
+    const baseFreq = this.getBaseFreq(pitch + cents / 100);
     const harmonics = this.currentTimbre.amplitudes.length;
     const transferFunction = this.currentTransferFunction;
     const { magnitudes, phases } = computeTransferFunction(
@@ -148,22 +156,20 @@ export class AudioEngine {
       osc.frequency.setValueAtTime(freq, now);
       osc.type = this.oscillatorType;
 
-      // 处理振幅
       const timbreAmp = this.currentTimbre.amplitudes[n - 1] || 0;
       const transferMag = magnitudes[n - 1] || 0;
-      const amplitude = timbreAmp * transferMag * this.volume * (volume / 127);
+      const targetGain = this.getTargetGain(timbreAmp, transferMag, volume);
 
-      // 处理相位
       const phaseDeg = phases[n - 1] || 0;
-      const phaseDelay = phaseDeg / (360 * freq);
+      const delaySeconds = this.getDelaySecond(phaseDeg, freq);
 
-      const startTime = Math.max(0, now + phaseDelay);
+      const startTime = Math.max(0, now + delaySeconds);
       const attackEnd = startTime + this.attackTime;
       const decayEnd = attackEnd + this.decayTime / Math.sqrt(n);
       const sustainEnd = decayEnd + duration;
       const stopTime = sustainEnd + this.releaseTime / Math.sqrt(n);
 
-      const attackGain = Math.max(amplitude, this.silenceGain);
+      const attackGain = Math.max(targetGain, this.silenceGain);
       const decayGain = Math.max(
         attackGain * this.sustainGain,
         this.silenceGain,
