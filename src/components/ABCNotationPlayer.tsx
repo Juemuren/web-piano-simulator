@@ -119,7 +119,10 @@ export default function ABCNotationPlayer({
           }
 
           if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
-            abcPlayer.play(abcElem.midiPitches);
+            abcPlayer.play(
+              abcElem.midiPitches,
+              visualObjRef.current?.millisecondsPerMeasure() / 1000,
+            );
           }
         }
       },
@@ -140,7 +143,7 @@ export default function ABCNotationPlayer({
           addHighlight(noteGroup);
         });
         if (ev.midiPitches) {
-          abcPlayer.play(ev.midiPitches);
+          abcPlayer.play(ev.midiPitches, ev.millisecondsPerMeasure / 1000);
         }
         return 'continue';
       },

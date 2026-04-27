@@ -1,5 +1,5 @@
 import { AudioEngine } from '../audio/AudioEngine';
-import { type MidiPitch, type MidiPitches } from 'abcjs';
+import { type MidiPitches } from 'abcjs';
 
 export class ABCPlayer {
   private audioEngine: AudioEngine;
@@ -16,19 +16,15 @@ export class ABCPlayer {
     this.onNoteEnd = onNoteEnd;
   }
 
-  playSinglePitch(midiPitch: MidiPitch) {
-    const { pitch, duration, volume, cents } = midiPitch;
+  play(midiPitches: MidiPitches, secondsPerDuration: number) {
+    midiPitches.forEach(({ pitch, duration, volume, cents }) => {
+      const correctDuration = duration * secondsPerDuration;
 
-    this.onNoteStart?.(pitch);
-    this.audioEngine.playNote(pitch, duration, volume, cents);
-    setTimeout(() => {
-      this.onNoteEnd?.(pitch);
-    }, duration * 1000);
-  }
-
-  play(midiPitches: MidiPitches) {
-    midiPitches.forEach((midiPitch) => {
-      this.playSinglePitch(midiPitch);
+      this.onNoteStart?.(pitch);
+      this.audioEngine.playNote(pitch, correctDuration, volume, cents);
+      setTimeout(() => {
+        this.onNoteEnd?.(pitch);
+      }, correctDuration * 1000);
     });
   }
 }
