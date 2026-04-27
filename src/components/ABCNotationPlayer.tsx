@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   type AbcElem,
+  type NoteTimingEvent,
   type TuneObject,
   renderAbc,
   TimingCallbacks,
 } from 'abcjs';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import { ABCPlayer } from '../services/abc/ABCPlayer';
-import { presets } from '../services/abc/ABCPresets';
+import { ABCPresets } from '../services/abc/ABCPresets';
 
 interface ABCNotationPlayerProps {
   audioEngine: AudioEngine;
@@ -95,58 +96,58 @@ export default function ABCNotationPlayer({
   }, [abcContent]);
 
   useEffect(() => {
-    const visualObjs = renderAbc('abcjs-paper', abcContent, {
+    const clickListener = (abcElem: AbcElem) => {
+      if (visualObjRef.current) {
+        const now = performance.now();
+        const clickedIndex = getSelectedIndex();
+        const prevClickedNote = lastClickedNoteRef.current;
+        lastClickedNoteRef.current = {
+          index: clickedIndex,
+          beats: getSelectedBeat(abcElem),
+          clickedAt: now,
+        };
+        if (
+          prevClickedNote?.index === clickedIndex &&
+          now - prevClickedNote.clickedAt <= DOUBLE_CLICK_INTERVAL_MS
+        ) {
+          handleStop();
+          handlePlay();
+          return;
+        }
+        if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
+          abcPlayer.play(
+            abcElem.midiPitches,
+            visualObjRef.current?.millisecondsPerMeasure() / 1000,
+          );
+        }
+      }
+    };
+
+    const eventCallback = (ev: NoteTimingEvent | null) => {
+      removeHighlight();
+      if (!ev) {
+        setIsPlaying(false);
+        return;
+      }
+      ev.elements?.forEach((noteGroup) => {
+        addHighlight(noteGroup);
+      });
+      if (ev.midiPitches) {
+        abcPlayer.play(ev.midiPitches, ev.millisecondsPerMeasure / 1000);
+      }
+      return 'continue';
+    };
+
+    visualObjRef.current = renderAbc('abcjs-paper', abcContent, {
       responsive: 'resize',
       add_classes: true,
-      clickListener: (abcElem) => {
-        if (visualObjRef.current) {
-          const now = performance.now();
-          const clickedIndex = getSelectedIndex();
-          const prevClickedNote = lastClickedNoteRef.current;
-          lastClickedNoteRef.current = {
-            index: clickedIndex,
-            beats: getSelectedBeat(abcElem),
-            clickedAt: now,
-          };
-
-          if (
-            prevClickedNote?.index === clickedIndex &&
-            now - prevClickedNote.clickedAt <= DOUBLE_CLICK_INTERVAL_MS
-          ) {
-            handleStop();
-            handlePlay();
-            return;
-          }
-
-          if (abcElem.midiPitches && abcElem.midiPitches.length > 0) {
-            abcPlayer.play(
-              abcElem.midiPitches,
-              visualObjRef.current?.millisecondsPerMeasure() / 1000,
-            );
-          }
-        }
-      },
-    });
-    visualObjRef.current = visualObjs[0];
+      clickListener,
+    })[0];
     visualObjRef.current.setUpAudio({});
     setHasNotes(visualObjRef.current.lines.length > 0);
 
     timingCallbacksRef.current = new TimingCallbacks(visualObjRef.current, {
-      eventCallback: (ev) => {
-        if (!ev) {
-          removeHighlight();
-          setIsPlaying(false);
-          return;
-        }
-        removeHighlight();
-        ev.elements?.forEach((noteGroup) => {
-          addHighlight(noteGroup);
-        });
-        if (ev.midiPitches) {
-          abcPlayer.play(ev.midiPitches, ev.millisecondsPerMeasure / 1000);
-        }
-        return 'continue';
-      },
+      eventCallback,
     });
   }, [abcContent, abcPlayer, handleStop, handlePlay]);
 
@@ -160,7 +161,7 @@ export default function ABCNotationPlayer({
               const index = parseInt(e.target.value);
               setSelectedPresetIndex(index);
               if (index >= 0) {
-                const preset = presets[index];
+                const preset = ABCPresets[index];
                 const response = await fetch(preset.path);
                 const content = await response.text();
                 setAbcContent(content);
@@ -177,7 +178,7 @@ export default function ABCNotationPlayer({
               "
           >
             <option value={-1}>自定义</option>
-            {presets.map((preset, index) => (
+            {ABCPresets.map((preset, index) => (
               <option key={index} value={index}>
                 {preset.name}
               </option>

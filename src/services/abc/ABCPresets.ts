@@ -5,4 +5,4 @@ export interface ABCPreset {
   path: string;
 }
 
-export const presets: ABCPreset[] = presetsData as ABCPreset[];
+export const ABCPresets = presetsData as ABCPreset[];
