@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AudioEngine } from '../services/audio/AudioEngine';
 
-interface SynthesizerSettingsProps {
+interface HarmonicSynthesizerProps {
   audioEngine: AudioEngine;
 }
 
-const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({
+const HarmonicSynthesizer: React.FC<HarmonicSynthesizerProps> = ({
   audioEngine,
 }) => {
   const [oscillatorType, setOscillatorType] = useState(
@@ -168,4 +168,4 @@ const SynthesizerSettings: React.FC<SynthesizerSettingsProps> = ({
   );
 };
 
-export default SynthesizerSettings;
+export default HarmonicSynthesizer;

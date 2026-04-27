@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { AudioEngine } from './services/audio/AudioEngine';
 import Piano from './components/Piano';
-import TimbreSelector from './components/TimbreSelector';
-import TransferFunctionSelector from './components/TransferFunctionSelector';
-import ABCNotationPlayer from './components/ABCNotationPlayer';
-import SynthesizerSettings from './components/Synthesizer';
+import TimbreAdjuster from './components/TimbreAdjuster';
+import TransferFunctionModifier from './components/TransferFunctionModifier';
+import ABCEditor from './components/ABCEditor';
+import HarmonicSynthesizer from './components/HarmonicSynthesizer';
 import CollapsibleSection from './components/CollapsibleSection';
 import Footer from './components/Footer';
 
@@ -48,23 +48,23 @@ function App() {
           <div className="flex w-full flex-col items-center gap-4 xl:flex-row xl:items-start xl:justify-center">
             <div className="w-full max-w-4xl xl:max-w-md xl:flex-1">
               <CollapsibleSection title="谐波合成器">
-                <SynthesizerSettings audioEngine={audioEngine} />
+                <HarmonicSynthesizer audioEngine={audioEngine} />
               </CollapsibleSection>
             </div>
             <div className="w-full max-w-4xl xl:max-w-md xl:flex-1">
               <CollapsibleSection title="音色调节器">
-                <TimbreSelector audioEngine={audioEngine} />
+                <TimbreAdjuster audioEngine={audioEngine} />
               </CollapsibleSection>
             </div>
             <div className="w-full max-w-4xl xl:max-w-md xl:flex-1">
-              <CollapsibleSection title="传函修改器">
-                <TransferFunctionSelector audioEngine={audioEngine} />
+              <CollapsibleSection title="传递函数修改器">
+                <TransferFunctionModifier audioEngine={audioEngine} />
               </CollapsibleSection>
             </div>
           </div>
           <div className="mx-auto w-full max-w-4xl">
             <CollapsibleSection title="乐谱编辑器">
-              <ABCNotationPlayer
+              <ABCEditor
                 audioEngine={audioEngine}
                 onNoteStart={handleNoteStart}
                 onNoteEnd={handleNoteEnd}

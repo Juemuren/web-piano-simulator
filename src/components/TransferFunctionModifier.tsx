@@ -6,11 +6,11 @@ import {
 } from '../services/audio/AudioPresets';
 import { AudioEngine } from '../services/audio/AudioEngine';
 
-interface TransferFunctionSelectorProps {
+interface TransferFunctionModifierProps {
   audioEngine: AudioEngine;
 }
 
-const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({
+const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
   audioEngine,
 }) => {
   const [transferFunction, setTransferFunction] = useState<TransferFunction>(
@@ -226,4 +226,4 @@ const TransferFunctionSelector: React.FC<TransferFunctionSelectorProps> = ({
   );
 };
 
-export default TransferFunctionSelector;
+export default TransferFunctionModifier;

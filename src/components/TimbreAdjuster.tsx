@@ -3,11 +3,11 @@ import type { TimbrePreset } from '../types';
 import { generatePresetTimbre } from '../services/audio/AudioPresets';
 import { AudioEngine } from '../services/audio/AudioEngine';
 
-interface TimbreSelectorProps {
+interface TimbreAdjusterProps {
   audioEngine: AudioEngine;
 }
 
-const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
+const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
   const [selectedPreset, setSelectedPreset] =
     useState<TimbrePreset>('ethereal');
   const [lambda, setLambda] = useState(0.5);
@@ -202,4 +202,4 @@ const TimbreSelector: React.FC<TimbreSelectorProps> = ({ audioEngine }) => {
   );
 };
 
-export default TimbreSelector;
+export default TimbreAdjuster;
