@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { TimbreType } from '../types';
+import type { TimbreType, Timbre } from '../types';
 import { getTimbrePreset } from '../services/audio/AudioPresets';
 import { AudioEngine } from '../services/audio/AudioEngine';
 
@@ -8,26 +8,19 @@ interface TimbreAdjusterProps {
 }
 
 const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
-  const [selectedPreset, setSelectedPreset] = useState<TimbreType>('ethereal');
   const [lambda, setLambda] = useState(0.5);
   const [sigma, setSigma] = useState(0.8);
   const [p, setP] = useState(1.5);
-  const [amplitudes, setAmplitudes] = useState<number[]>(
-    () => getTimbrePreset('ethereal').amplitudes,
+  const [timbre, setTimbre] = useState<Timbre>(() =>
+    getTimbrePreset('ethereal', 0.5, 0.8, 1.5),
   );
 
   useEffect(() => {
-    audioEngine.setTimbre({
-      type: selectedPreset,
-      amplitudes,
-    });
-  }, [selectedPreset, amplitudes, audioEngine]);
+    audioEngine.setTimbre(timbre);
+  }, [timbre, audioEngine]);
 
   const handlePresetChange = (preset: TimbreType) => {
-    setSelectedPreset(preset);
-    if (preset !== 'custom') {
-      setAmplitudes(getTimbrePreset(preset, lambda, sigma, p).amplitudes);
-    }
+    setTimbre(getTimbrePreset(preset, lambda, sigma, p));
   };
 
   const handleParamsChange = (update: {
@@ -35,28 +28,32 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
     sigma?: number;
     p?: number;
   }) => {
-    if (selectedPreset !== 'custom') {
-      setAmplitudes(
-        getTimbrePreset(selectedPreset, update.lambda, update.sigma, update.p)
-          .amplitudes,
-      );
-      if (update.lambda) setLambda(update.lambda);
-      if (update.sigma) setSigma(update.sigma);
-      if (update.p) setP(update.p);
-    }
+    setTimbre((prev) =>
+      getTimbrePreset(
+        prev.type,
+        update.lambda ?? lambda,
+        update.sigma ?? sigma,
+        update.p ?? p,
+      ),
+    );
+    if (update.lambda) setLambda(update.lambda);
+    if (update.sigma) setSigma(update.sigma);
+    if (update.p) setP(update.p);
   };
 
   const handleAmplitudeChange = (index: number, value: number) => {
-    setSelectedPreset('custom');
-    setAmplitudes((prev) => {
-      const next = [...prev];
-      next[index] = value;
-      return next;
+    setTimbre((prev) => {
+      const amplitudes = [...prev.amplitudes];
+      amplitudes[index] = value;
+      return {
+        type: 'custom',
+        amplitudes,
+      };
     });
   };
 
   const harmonicLabels = Array.from(
-    { length: amplitudes.length },
+    { length: timbre.amplitudes.length },
     (_, index) => (
       <span>
         f<sub>{index + 1}</sub>
@@ -68,7 +65,7 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
     <div className="w-full sm:w-auto p-5 rounded-3xl border border-slate-700/50 shadow-xl shadow-slate-950/20 backdrop-blur-sm">
       <div className="flex flex-col mb-2 gap-3">
         <select
-          value={selectedPreset}
+          value={timbre.type}
           onChange={(e) => {
             handlePresetChange(e.target.value as TimbreType);
           }}
@@ -89,7 +86,7 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
         </select>
       </div>
 
-      {selectedPreset === 'normal' && (
+      {timbre.type === 'normal' && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span>击弦点</span>
@@ -109,7 +106,7 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
         </div>
       )}
 
-      {(selectedPreset === 'soft' || selectedPreset === 'realistic') && (
+      {(timbre.type === 'soft' || timbre.type === 'realistic') && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span>衰减率</span>
@@ -129,7 +126,7 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
         </div>
       )}
 
-      {selectedPreset === 'realistic' && (
+      {timbre.type === 'realistic' && (
         <div className="mb-4 pb-1 rounded-2xl border border-slate-700/50 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span>幂指数</span>
@@ -150,7 +147,7 @@ const TimbreAdjuster: React.FC<TimbreAdjusterProps> = ({ audioEngine }) => {
       )}
 
       <div className="flex items-end gap-2 overflow-x-auto px-1 pb-3">
-        {amplitudes.map((amp, index) => (
+        {timbre.amplitudes.map((amp, index) => (
           <div key={index} className="flex flex-1 flex-col items-center gap-3">
             <div className="text-xs">{amp.toFixed(2)}</div>
             <div className="relative flex h-36 w-8 items-center justify-center">

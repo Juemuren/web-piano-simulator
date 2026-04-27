@@ -17,8 +17,14 @@ function normalizeDeg(angle: number) {
   return (((angle % 360) + 540) % 360) - 180;
 }
 
+function normalizeAmp(amplitudes: number[]) {
+  const maxAmplitudes = Math.max(...amplitudes);
+  if (maxAmplitudes === 0) return amplitudes.map(() => 0);
+  return amplitudes.map((a) => a / maxAmplitudes);
+}
+
 export function getTimbrePreset(
-  type: Exclude<TimbreType, 'custom'>,
+  type: TimbreType,
   lambda: number = 0.5,
   sigma: number = 0.8,
   p: number = 1.5,
@@ -54,9 +60,7 @@ export function getTimbrePreset(
     amplitudes.push(amp);
   }
 
-  const maxAmp = Math.max(...amplitudes);
-  const normalized = amplitudes.map((a) => a / maxAmp);
-  return { type, amplitudes: normalized };
+  return { type, amplitudes: normalizeAmp(amplitudes) };
 }
 
 export function getTransferFunctionPreset(
