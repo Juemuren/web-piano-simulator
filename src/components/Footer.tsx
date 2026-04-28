@@ -19,21 +19,31 @@ function FooterPanel({ title, children }: FooterPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950/60">
+    <section
+      className="
+      rounded-lg
+      bg-slate-100/50 dark:bg-slate-900/50
+      border border-slate-200 dark:border-slate-800
+    "
+    >
       <button
         type="button"
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/80"
+        className="
+          w-full flex items-center justify-between px-4 py-3
+          rounded-lg text-left
+          transition-colors hover:bg-slate-100 dark:hover:bg-slate-900
+        "
         aria-expanded={isExpanded}
       >
-        <span className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        <span className="text-sm font-semibold tracking-wide text-slate-500">
           {title}
         </span>
-        <span className="shrink-0 text-sm text-slate-400 dark:text-slate-500">
+        <span className="shrink-0 text-sm text-gray-500">
           {isExpanded ? '▼' : '▶'}
         </span>
       </button>
-      <div className={isExpanded ? 'px-4 py-4 text-base leading-7' : 'hidden'}>
+      <div className={isExpanded ? 'p-4 leading-8 text-base' : 'hidden'}>
         {children}
       </div>
     </section>
@@ -46,7 +56,16 @@ function FooterLink({ href, label }: FooterLinkProps) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="group flex w-full items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-300 dark:hover:border-blue-500/60 dark:hover:bg-blue-950/30 dark:hover:text-blue-200 sm:max-w-sm"
+      className="
+        w-full flex items-center justify-between px-4 py-3
+        text-left text-slate-600 dark:text-slate-400
+        rounded-lg bg-slate-50 dark:bg-slate-950
+        border border-slate-200 dark:border-slate-800
+        transition-colors
+        hover:text-blue-700 dark:hover:text-blue-300
+        hover:bg-blue-50 dark:hover:bg-blue-950
+        hover:border-blue-300 dark:hover:border-blue-700
+      "
     >
       <span className="text-sm font-medium">{label}</span>
       <span
@@ -61,8 +80,14 @@ function FooterLink({ href, label }: FooterLinkProps) {
 
 function Footer() {
   return (
-    <footer className="bg-white px-6 py-8 text-left text-slate-600 dark:bg-slate-900 dark:text-slate-300">
-      <div className="mx-auto grid w-full max-w-4xl gap-5 border-t border-slate-200 pt-6 dark:border-slate-800 sm:grid-cols-[1.15fr_0.85fr] sm:items-start">
+    <footer className="px-6 py-8 bg-slate-100/25 dark:bg-slate-900/75">
+      <div
+        className="
+          mx-auto w-full max-w-4xl text-left
+          grid gap-5 sm:grid-cols-2 sm:items-start
+          border-t pt-6 border-slate-300  dark:border-slate-700
+        "
+      >
         <div className="grid gap-3">
           <FooterPanel title="使用技巧">
             在乐谱编辑器中，单击乐谱中的音符可以选中并播放这个音符，而双击则会直接从选中处演奏整个乐谱

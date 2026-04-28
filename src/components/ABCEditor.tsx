@@ -191,8 +191,8 @@ export default function ABCNotationPlayer({
         placeholder="输入乐谱或选择预设"
         className="
           w-full h-48 p-3 mb-4 text-sm resize-none
-          bg-gray-200 dark:bg-gray-800
-          border border-gray-200/80 dark:border-slate-800/20
+          bg-slate-200/75 dark:bg-slate-800/25
+          border border-slate-200/80 dark:border-slate-800/20
           focus:outline-none focus:ring-2 focus:ring-indigo-500/50
         "
       />
