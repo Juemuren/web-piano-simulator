@@ -78,10 +78,10 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
             <option value="delay">纯延时</option>
             <option value="single_echo">单回声</option>
             <option value="multi_echo">多回声</option>
+            <option value="all_pass">全通</option>
             <option value="low_pass">低通</option>
             <option value="high_pass">高通</option>
             <option value="band_pass">带通</option>
-            <option value="all_pass">全通</option>
           </ControlSelect>
         </div>
       </div>
@@ -126,7 +126,7 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
         />
       )}
 
-      {(transferFunction.type === 'low_pass' ||
+      {(transferFunction.type === 'high_pass' ||
         transferFunction.type === 'band_pass') && (
         <ControlRange
           label="最小频率"
@@ -139,7 +139,7 @@ const TransferFunctionModifier: React.FC<TransferFunctionModifierProps> = ({
         />
       )}
 
-      {(transferFunction.type === 'high_pass' ||
+      {(transferFunction.type === 'low_pass' ||
         transferFunction.type === 'band_pass') && (
         <ControlRange
           label="最大频率"

@@ -60,9 +60,9 @@ const HarmonicSynthesizer: React.FC<HarmonicSynthesizerProps> = ({
             }
           >
             <option value="sine">正弦波</option>
-            <option value="square">方波</option>
-            <option value="sawtooth">锯齿波</option>
             <option value="triangle">三角波</option>
+            <option value="sawtooth">锯齿波</option>
+            <option value="square">方波</option>
           </ControlSelect>
         </div>
       </div>

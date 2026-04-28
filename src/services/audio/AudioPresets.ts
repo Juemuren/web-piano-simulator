@@ -106,6 +106,16 @@ export function getTransferFunctionPreset(
         phaseDeg = radToDeg(phaseRad);
         break;
       }
+      case 'all_pass': {
+        const arg = delayToArg(delay, freq);
+        const cosArg = Math.cos(arg);
+        const sinArg = Math.sin(arg);
+        mag = 1;
+        const phaseRad =
+          arg + 2 * Math.atan2(alpha * sinArg, 1 - alpha * cosArg);
+        phaseDeg = normalizeDeg(radToDeg(phaseRad));
+        break;
+      }
       case 'low_pass': {
         mag = freq <= maxFreq ? 1 : 0;
         phaseDeg = 0;
@@ -119,16 +129,6 @@ export function getTransferFunctionPreset(
       case 'band_pass': {
         mag = freq >= minFreq && freq <= maxFreq ? 1 : 0;
         phaseDeg = 0;
-        break;
-      }
-      case 'all_pass': {
-        const arg = delayToArg(delay, freq);
-        const cosArg = Math.cos(arg);
-        const sinArg = Math.sin(arg);
-        mag = 1;
-        const phaseRad =
-          arg + 2 * Math.atan2(alpha * sinArg, 1 - alpha * cosArg);
-        phaseDeg = normalizeDeg(radToDeg(phaseRad));
         break;
       }
     }
