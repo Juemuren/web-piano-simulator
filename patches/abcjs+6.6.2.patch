@@ -1,8 +1,133 @@
+diff --git a/node_modules/abcjs/src/parse/abc_parse_header.js b/node_modules/abcjs/src/parse/abc_parse_header.js
+index da525aa..3228a60 100644
+--- a/node_modules/abcjs/src/parse/abc_parse_header.js
++++ b/node_modules/abcjs/src/parse/abc_parse_header.js
+@@ -356,7 +356,9 @@ var ParseHeader = function(tokenizer, warn, multilineVars, tune, tuneBuilder) {
+ 					return [ e-i+1+ws ];
+ 				case "[M:":
+ 					var meter = this.setMeter(line.substring(i+3, e));
+-					if (tuneBuilder.hasBeginMusic() && meter)
++					if (startLine && multilineVars.currentVoice && meter)
++						multilineVars.staves[multilineVars.currentVoice.staffNum].meter = meter;
++					else if (tuneBuilder.hasBeginMusic() && meter)
+ 						tuneBuilder.appendStartingElement('meter', startChar, endChar, meter);
+ 					else
+ 						multilineVars.meter = meter;
+diff --git a/node_modules/abcjs/src/parse/abc_parse_key_voice.js b/node_modules/abcjs/src/parse/abc_parse_key_voice.js
+index 7085c0f..d0af5e3 100644
+--- a/node_modules/abcjs/src/parse/abc_parse_key_voice.js
++++ b/node_modules/abcjs/src/parse/abc_parse_key_voice.js
+@@ -85,9 +85,20 @@ var parseKeyVoice = {};
+ 		key.accidentals.forEach(function(k) {
+ 		ret.accidentals.push(Object.assign({},k));
+ 		});
++		if (key.explicitAccidentals) {
++			ret.explicitAccidentals = [];
++			key.explicitAccidentals.forEach(function(k) {
++				ret.explicitAccidentals.push(Object.assign({},k));
++			});
++		}
+ 		return ret;
+ 	};
+ 
++	var setVoiceKey = function() {
++		if (multilineVars.currentVoice)
++			multilineVars.currentVoice.key = parseKeyVoice.deepCopyKey(multilineVars.key);
++	};
++
+ 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
+ 
+ 	parseKeyVoice.addPosToKey = function(clef, key) {
+@@ -230,18 +241,36 @@ var parseKeyVoice = {};
+ 				multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
+ 				ret.foundKey = true;
+ 				tokens.shift();
++				if (isInline)
++					setVoiceKey();
++				else {
++					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
++					setVoiceKey();
++				}
+ 				break;
+ 			case 'Hp':
+ 				parseDirective.addDirective("bagpipes");
+ 				multilineVars.key = { root: "Hp", accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}], acc: "", mode: "" };
+ 				ret.foundKey = true;
+ 				tokens.shift();
++				if (isInline)
++					setVoiceKey();
++				else {
++					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
++					setVoiceKey();
++				}
+ 				break;
+ 			case 'none':
+ 				// we got the none key - that's the same as C to us
+ 				multilineVars.key = { root: "none", accidentals: [], acc: "", mode: "" };
+ 				ret.foundKey = true;
+ 				tokens.shift();
++				if (isInline)
++					setVoiceKey();
++				else {
++					multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
++					setVoiceKey();
++				}
+ 				break;
+ 			default:
+ 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
+@@ -309,6 +338,12 @@ var parseKeyVoice = {};
+ 							}
+ 						}
+ 					}
++					if (isInline)
++						setVoiceKey();
++					else {
++						multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
++						setVoiceKey();
++					}
+ 				}
+ 				break;
+ 		}
+@@ -358,6 +393,12 @@ var parseKeyVoice = {};
+ 					}
+ 				}
+ 			}
++			if (isInline)
++				setVoiceKey();
++			else {
++				multilineVars.globalKey = parseKeyVoice.deepCopyKey(multilineVars.key);
++				setVoiceKey();
++			}
+ 		}
+ 
+ 		// Now see if any optional parameters are present. They have the form "key=value", except that "clef=" is optional
+@@ -499,6 +540,10 @@ var parseKeyVoice = {};
+ 				return // there was no change so don't reset it.
+ 		}
+ 		multilineVars.currentVoice = currentVoice;
++		if (currentVoice.key)
++			multilineVars.key = parseKeyVoice.deepCopyKey(currentVoice.key);
++		else if (multilineVars.globalKey)
++			multilineVars.key = parseKeyVoice.deepCopyKey(multilineVars.globalKey);
+ 		return tuneBuilder.setCurrentVoice(currentVoice.staffNum, currentVoice.index, id);
+ 	};
+ 
 diff --git a/node_modules/abcjs/types/index.d.ts b/node_modules/abcjs/types/index.d.ts
-index de64044..4473b2f 100644
+index de64044..43f7fb5 100644
 --- a/node_modules/abcjs/types/index.d.ts
 +++ b/node_modules/abcjs/types/index.d.ts
-@@ -791,7 +791,16 @@ declare module 'abcjs' {
+@@ -169,7 +169,9 @@ declare module 'abcjs' {
+ 		volume: number;
+ 		cents?: number;
+ 		start: number;
+-		gap: number;
++		gap?: number;
++		startChar: number;
++		endChar: number;
+ 	}
+ 
+ 	export type MidiPitches = Array<MidiPitch>;
+@@ -791,7 +793,16 @@ declare module 'abcjs' {
  		startChar: number;
  		endChar: number;
  		duration: number;
@@ -20,7 +145,7 @@ index de64044..4473b2f 100644
  		rest?: { type: 'rest' | 'spacer' | 'invisible' | 'invisible-multimeasure' | 'multimeasure', text? : number};
  	}
  	export type VoiceItem = VoiceItemClef | VoiceItemBar | VoiceItemGap | VoiceItemKey | VoiceItemMeter | VoiceItemMidi | VoiceItemOverlay | VoiceItemPart | VoiceItemScale | VoiceItemStem | VoiceItemStyle | VoiceItemTempo | VoiceItemTranspose | VoiceItemNote;
-@@ -935,6 +944,9 @@ declare module 'abcjs' {
+@@ -935,6 +946,9 @@ declare module 'abcjs' {
  	export interface AbcElem {
  		el_type: string; //TODO enumerate these
  		abselem: AbsoluteElement;
@@ -30,7 +155,7 @@ index de64044..4473b2f 100644
  		beambr?: number;
  		chord?: Array<{name: string; position: ChordPlacement}>
  		decoration: Array<string> //TODO enumerate these
-@@ -945,9 +957,12 @@ declare module 'abcjs' {
+@@ -945,9 +959,12 @@ declare module 'abcjs' {
  		gracenotes?: Array<{duration: number; name:string; pitch: number; verticalPosition: number;}>
  		lyric?: Array<{syllable: string; divider: ' ' | '-' | '_';}>
  		noStem?: boolean
