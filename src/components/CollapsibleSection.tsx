@@ -17,8 +17,8 @@ function CollapsibleSection({ title, children }: CollapsibleSectionProps) {
         onClick={handleToggle}
         className="
           w-full text-center p-3 rounded-lg shadow-md
-          bg-slate-200 dark:bg-slate-800
-          hover:bg-slate-300 dark:hover:bg-slate-700
+          bg-app-surface-muted dark:bg-app-surface-muted-dark
+          hover:bg-app-border dark:hover:bg-app-border-dark
           transition-colors
         "
       >

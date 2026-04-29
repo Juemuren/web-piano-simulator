@@ -38,8 +38,8 @@ function App() {
         className="
           w-full mx-auto min-h-screen grow px-3
           flex flex-col justify-center gap-5
-          bg-slate-50 dark:bg-slate-950
-          text-slate-900 dark:text-slate-100
+          bg-app-bg dark:bg-app-bg-dark
+          text-app-text dark:text-app-text-dark
         "
       >
         <h1 className="text-3xl font-bold text-center">钢琴模拟器</h1>

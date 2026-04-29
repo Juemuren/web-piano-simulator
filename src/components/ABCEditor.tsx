@@ -191,9 +191,9 @@ export default function ABCNotationPlayer({
         placeholder="输入乐谱或选择预设"
         className="
           w-full h-48 p-3 mb-4 text-sm resize-none
-          bg-slate-200/75 dark:bg-slate-800/25
-          border border-slate-200/80 dark:border-slate-800/20
-          focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+          bg-app-surface-muted/75 dark:bg-app-surface-muted-dark/60
+          border border-app-border/80 dark:border-app-border-dark/70
+          focus:outline-none focus:ring-2 focus:ring-app-accent/50
         "
       />
 
@@ -202,8 +202,8 @@ export default function ABCNotationPlayer({
           <button
             onClick={isPlaying ? handleStop : handlePlay}
             className={`
-              w-full py-2 text-white rounded-2xl transition-colors
-              ${isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
+              w-full py-2 text-app-on-accent rounded-2xl transition-colors
+              ${isPlaying ? 'bg-app-danger hover:bg-app-danger-strong' : 'bg-app-success hover:bg-app-success-strong'}
             `}
           >
             {isPlaying ? '停止播放' : '开始播放'}
@@ -215,8 +215,8 @@ export default function ABCNotationPlayer({
         id="abcjs-paper"
         className="
           w-full mt-4 rounded-3xl shadow-sm
-          border border-slate-300/20 dark:border-slate-700/80
-          bg-white/90 dark:bg-black/10
+          border border-app-border/40 dark:border-app-border-dark/80
+          bg-app-surface/90 dark:bg-app-surface-dark/60
         "
       />
     </ControlPanel>

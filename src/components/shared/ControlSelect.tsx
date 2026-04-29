@@ -11,9 +11,9 @@ function ControlSelect({
     <select
       className={`
         w-full py-2 rounded-2xl text-center
-        border border-slate-300/80 dark:border-slate-700/20
-        bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100
-        focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50
+        border border-app-border/80 dark:border-app-border-dark/80
+        bg-app-surface text-app-text dark:bg-app-surface-dark dark:text-app-text-dark
+        focus:border-app-accent focus:ring-2 focus:ring-app-accent/50
         ${className}
       `}
       {...props}

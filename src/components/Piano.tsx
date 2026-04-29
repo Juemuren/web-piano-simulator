@@ -101,12 +101,7 @@ const Piano: React.FC<PianoProps> = ({
   }
 
   return (
-    <div
-      className="
-        w-full py-4 rounded-lg shadow-md
-        ring-1 ring-slate-200 dark:ring-slate-800
-      "
-    >
+    <div className="w-full py-4">
       <div className="relative inline-block" style={{ height: whiteKeyHeight }}>
         <div className="flex">
           {whiteKeys.map((key) => {
@@ -122,10 +117,10 @@ const Piano: React.FC<PianoProps> = ({
                 onTouchEnd={(e) => handleKeyUp(e, key.note)}
                 onTouchCancel={(e) => handleKeyUp(e, key.note)}
                 className={`
-                  text-xs border border-gray-400 transition-all duration-100 ${
+                  text-xs border border-app-accent transition-all duration-100 ${
                     isPressed
-                      ? 'bg-blue-200 text-black shadow-inner'
-                      : 'bg-white text-black'
+                      ? 'bg-piano-white-active text-piano-black shadow-inner'
+                      : 'bg-piano-white text-piano-black'
                   }`}
                 style={{
                   width: whiteKeyWidth,
@@ -158,10 +153,10 @@ const Piano: React.FC<PianoProps> = ({
                 onTouchEnd={(e) => handleKeyUp(e, key.note)}
                 onTouchCancel={(e) => handleKeyUp(e, key.note)}
                 className={`
-                  text-xs border border-gray-600 transition-all duration-100 ${
+                  text-xs border-none transition-all duration-100 ${
                     isPressed
-                      ? 'bg-blue-800 text-white shadow-inner'
-                      : 'bg-black text-white'
+                      ? 'bg-piano-black-active text-piano-white shadow-inner'
+                      : 'bg-piano-black text-piano-white'
                   }`}
                 style={{
                   width: blackKeyWidth,

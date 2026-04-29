@@ -22,8 +22,8 @@ function FooterPanel({ title, children }: FooterPanelProps) {
     <section
       className="
       rounded-lg
-      bg-slate-100/50 dark:bg-slate-900/50
-      border border-slate-200 dark:border-slate-800
+      bg-app-surface/50 dark:bg-app-surface-dark/50
+      border border-app-border dark:border-app-border-dark
     "
     >
       <button
@@ -32,18 +32,23 @@ function FooterPanel({ title, children }: FooterPanelProps) {
         className="
           w-full flex items-center justify-between px-4 py-3
           rounded-lg text-left
-          transition-colors hover:bg-slate-100 dark:hover:bg-slate-900
+          transition-colors hover:bg-app-surface dark:hover:bg-app-surface-dark
         "
         aria-expanded={isExpanded}
       >
-        <span className="text-sm font-semibold tracking-wide text-slate-500">
+        <span className="text-sm font-semibold tracking-wide text-app-muted dark:text-app-muted-dark">
           {title}
         </span>
-        <span className="shrink-0 text-sm text-gray-500">
+        <span className="shrink-0 text-sm text-app-muted dark:text-app-muted-dark">
           {isExpanded ? '▼' : '▶'}
         </span>
       </button>
-      <div className={isExpanded ? 'p-4 leading-8 text-base' : 'hidden'}>
+      <div
+        className={`
+          text-sm text-app-muted dark:text-app-muted-dark
+          ${isExpanded ? 'p-4 leading-8 text-base' : 'hidden'}
+        `}
+      >
         {children}
       </div>
     </section>
@@ -57,19 +62,25 @@ function FooterLink({ href, label }: FooterLinkProps) {
       target="_blank"
       rel="noreferrer"
       className="
-        w-full flex items-center justify-between px-4 py-3
-        text-left text-slate-600 dark:text-slate-400
-        rounded-lg bg-slate-50 dark:bg-slate-950
-        border border-slate-200 dark:border-slate-800
+        group w-full flex items-center justify-between px-4 py-3
+        text-left text-app-muted dark:text-app-muted-dark
+        rounded-lg bg-app-surface dark:bg-app-surface-dark
+        border border-app-border dark:border-app-border-dark
         transition-colors
-        hover:text-blue-700 dark:hover:text-blue-300
-        hover:bg-blue-50 dark:hover:bg-blue-950
-        hover:border-blue-300 dark:hover:border-blue-700
+        hover:text-app-accent-strong dark:hover:text-app-accent-weak
+        hover:bg-app-accent-weak/30 dark:hover:bg-app-accent-strong/30
+        hover:border-app-accent dark:hover:border-app-accent
       "
     >
       <span className="text-sm font-medium">{label}</span>
       <span
-        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-slate-300 text-xs text-slate-400 transition-colors group-hover:border-blue-300 group-hover:text-blue-600 dark:border-slate-700 dark:text-slate-500 dark:group-hover:border-blue-500/70 dark:group-hover:text-blue-300"
+        className="
+          flex h-4 w-4 shrink-0 items-center justify-center
+          rounded-full border border-app-border dark:border-app-border-dark
+          text-xs text-app-muted dark:text-app-muted-dark
+          transition-colors group-hover:text-app-accent dark:group-hover:text-app-accent-weak
+          group-hover:border-app-accent dark:group-hover:border-app-accent 
+        "
         aria-hidden="true"
       >
         ↗
@@ -80,12 +91,12 @@ function FooterLink({ href, label }: FooterLinkProps) {
 
 function Footer() {
   return (
-    <footer className="px-6 py-8 bg-slate-100/25 dark:bg-slate-900/75">
+    <footer className="px-6 py-8 bg-app-surface/15 dark:bg-app-surface-dark/85">
       <div
         className="
           mx-auto w-full max-w-4xl text-left
           grid gap-5 sm:grid-cols-2 sm:items-start
-          border-t pt-6 border-slate-300  dark:border-slate-700
+          border-t pt-6 border-app-border dark:border-app-border-dark
         "
       >
         <div className="grid gap-3">

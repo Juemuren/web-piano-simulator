@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AudioEngine } from '../services/audio/AudioEngine';
 import ControlPanel from './shared/ControlPanel';
 import ControlSelect from './shared/ControlSelect';
-import ControlRange from './shared/ControRangel';
+import ControlRange from './shared/ControRange';
 
 interface HarmonicSynthesizerProps {
   audioEngine: AudioEngine;
