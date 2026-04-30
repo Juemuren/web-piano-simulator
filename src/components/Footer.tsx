@@ -22,7 +22,7 @@ function FooterPanel({ title, children }: FooterPanelProps) {
     <section
       className="
       rounded-lg
-      bg-app-surface/50 dark:bg-app-surface-dark/50
+      bg-app-bg/50 dark:bg-app-bg-dark/50
       border border-app-border dark:border-app-border-dark
     "
     >
@@ -32,7 +32,7 @@ function FooterPanel({ title, children }: FooterPanelProps) {
         className="
           w-full flex items-center justify-between px-4 py-3
           rounded-lg text-left
-          transition-colors hover:bg-app-surface dark:hover:bg-app-surface-dark
+          transition-colors hover:bg-app-accent-weak dark:hover:bg-app-accent-strong
         "
         aria-expanded={isExpanded}
       >
@@ -64,11 +64,11 @@ function FooterLink({ href, label }: FooterLinkProps) {
       className="
         group w-full flex items-center justify-between px-4 py-3
         text-left text-app-muted dark:text-app-muted-dark
-        rounded-lg bg-app-surface dark:bg-app-surface-dark
+        rounded-lg bg-app-bg/50 dark:bg-app-bg-dark/50
         border border-app-border dark:border-app-border-dark
         transition-colors
         hover:text-app-accent-strong dark:hover:text-app-accent-weak
-        hover:bg-app-accent-weak/30 dark:hover:bg-app-accent-strong/30
+        hover:bg-app-accent-weak dark:hover:bg-app-accent-strong
         hover:border-app-accent dark:hover:border-app-accent
       "
     >
@@ -91,7 +91,7 @@ function FooterLink({ href, label }: FooterLinkProps) {
 
 function Footer() {
   return (
-    <footer className="px-6 py-8 bg-app-surface/15 dark:bg-app-surface-dark/85">
+    <footer className="px-6 py-8 bg-app-muted/75 dark:bg-app-muted-dark/25">
       <div
         className="
           mx-auto w-full max-w-4xl text-left
